@@ -1,9 +1,11 @@
 inapppy
 =======
-|travis|
+|travis| |pypi|
 
 .. |travis| image:: https://travis-ci.org/dotpot/InAppPy.svg?branch=master
     :target: https://travis-ci.org/dotpot/InAppPy
+.. |pypi| image:: https://badge.fury.io/py/inapppy.svg
+    :target: https://badge.fury.io/py/inapppy
 
 In-app purchase validator for Apple AppStore and GooglePlay.
 
