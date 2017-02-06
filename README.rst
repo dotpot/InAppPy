@@ -1,5 +1,9 @@
 inapppy
 =======
+|travis|
+
+.. |travis| image:: https://travis-ci.org/dotpot/InAppPy.svg?branch=master
+    :target: https://travis-ci.org/dotpot/InAppPy
 
 In-app purchase validator for Apple AppStore and GooglePlay.
 
