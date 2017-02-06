@@ -1,4 +1,4 @@
-inapppy
+InAppPy
 =======
 |travis| |pypi|
 
