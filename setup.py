@@ -10,7 +10,7 @@ setup(
     keywords='in-app store purchase googleplay appstore validation',
     author='Lukas Šalkauskas',
     author_email='halfas.online@gmail.com',
-    url='',
+    url='https://github.com/dotpot/InAppPy',
     long_description=open('README.rst').read(),
     license='MIT'
 )
