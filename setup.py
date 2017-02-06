@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='inapppy',
-    version='0.1',
+    version='0.2',
     packages=['inapppy'],
     install_requires=['rsa', 'requests'],
     description="In-app purchase validator for Apple AppStore and GooglePlay.",

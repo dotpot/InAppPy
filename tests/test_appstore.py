@@ -56,3 +56,17 @@ def test_appstore_validate_sandbox():
         assert mock_method.call_args[0][1] == {'receipt-data': 'test-receipt'}
 
 
+def test_appstore_validate_attach_raw_response_to_the_exception():
+    validator = AppStoreValidator(bundle_id='test-bundle-id')
+    assert validator is not None
+
+    raw_response = {'status': 21000, 'foo': 'bar'}
+
+    with pytest.raises(InAppPyValidationError) as ex:
+        with patch.object(AppStoreValidator, 'post_json', return_value=raw_response) as mock_method:
+            validator.validate(receipt='test-receipt', shared_secret='shared-secret')
+            assert mock_method.call_count == 1
+            assert mock_method.call_args[0][0] == 'https://buy.itunes.apple.com/verifyReceipt'
+            assert mock_method.call_args[0][1] == {'receipt-data': 'test-receipt', 'password': 'shared-secret'}
+            assert ex.raw_response is not None
+            assert ex.raw_response == raw_response

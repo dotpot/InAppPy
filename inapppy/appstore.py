@@ -46,6 +46,8 @@ class AppStoreValidator(object):
         status = api_response['status']
         if status != api_result_ok:
             error = api_result_errors.get(status, InAppPyValidationError('Unknown API status'))
+            error.raw_response = api_response
+
             raise error
 
         return api_response
