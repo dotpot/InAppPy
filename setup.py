@@ -3,10 +3,10 @@ from setuptools import setup
 
 setup(
     name='inapppy',
-    version='0.2',
+    version='0.3',
     packages=['inapppy'],
     install_requires=['rsa', 'requests'],
-    description="In-app purchase validator for Apple AppStore and GooglePlay.",
+    description="In-app purchase validation library for Apple AppStore and GooglePlay.",
     keywords='in-app store purchase googleplay appstore validation',
     author='Lukas Šalkauskas',
     author_email='halfas.online@gmail.com',
