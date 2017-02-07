@@ -18,18 +18,27 @@ api_result_errors = {
 
 
 class AppStoreValidator(object):
+    bundle_id = None
+    sandbox = None
+    url = None
 
     def __init__(self, bundle_id, sandbox=False):
         self.bundle_id = bundle_id
+        self.sandbox = sandbox
 
         if not self.bundle_id:
             raise InAppPyValidationError('`bundle_id` cannot be empty')
 
-        self.url = ('https://sandbox.itunes.apple.com/verifyReceipt' if sandbox else
+        self._change_url_by_sandbox()
+
+    def _change_url_by_sandbox(self):
+        self.url = ('https://sandbox.itunes.apple.com/verifyReceipt' if self.sandbox else
                     'https://buy.itunes.apple.com/verifyReceipt')
 
-    def post_json(self, url, request_json):
-        return requests.post(url, json=request_json).json()
+    def post_json(self, request_json):
+        self._change_url_by_sandbox()
+
+        return requests.post(self.url, json=request_json).json()
 
     def validate(self, receipt, shared_secret=None):
         receipt_json = {'receipt-data': receipt}
@@ -39,7 +48,7 @@ class AppStoreValidator(object):
             receipt_json['password'] = shared_secret
 
         try:
-            api_response = self.post_json(self.url, receipt_json)
+            api_response = self.post_json(receipt_json)
         except (ValueError, RequestException):
             raise InAppPyValidationError('HTTP error')
 
