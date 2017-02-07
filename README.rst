@@ -24,7 +24,7 @@ Google Play (validates `receipt` against provided `signature` using RSA):
 -------------------------------------------------------------------------
 .. code:: python
 
-    from inapppy import GooglePlayValidator, InAppValidationError
+    from inapppy import GooglePlayValidator, InAppPyValidationError
 
 
     bundle_id = 'com.yourcompany.yourapp'
@@ -33,7 +33,7 @@ Google Play (validates `receipt` against provided `signature` using RSA):
 
     try:
         validation_result = validator.validate('receipt', 'signature')
-    except InAppValidationError:
+    except InAppPyValidationError:
         # handle validation error
         pass
 
@@ -41,7 +41,7 @@ App Store (validates `receipt` using optional `shared-secret` against iTunes ser
 --------------------------------------------------------------------------------------
 .. code:: python
 
-    from inapppy import AppStoreValidator, InAppValidationError
+    from inapppy import AppStoreValidator, InAppPyValidationError
 
 
     bundle_id = 'com.yourcompany.yourapp'
@@ -49,7 +49,7 @@ App Store (validates `receipt` using optional `shared-secret` against iTunes ser
 
     try:
         validation_result = validator.validate('receipt', 'optional-shared-secret')
-    except InAppValidationError as ex:
+    except InAppPyValidationError as ex:
         # handle validation error
         response_from_apple = ex.raw_response  # contains actual response from AppStore service.
         pass
