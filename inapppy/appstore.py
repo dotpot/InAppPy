@@ -60,6 +60,7 @@ class AppStoreValidator(object):
 
         :param receipt: receipt
         :param shared_secret: optional shared secret.
+        :param exclude_old_transactions: optional to include only the latest renewal transaction
         :return: validation result or exception.
         """
         receipt_json = {'receipt-data': receipt}
