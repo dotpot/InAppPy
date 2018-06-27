@@ -45,14 +45,19 @@ App Store (validates `receipt` using optional `shared-secret` against iTunes ser
 
 
     bundle_id = 'com.yourcompany.yourapp'
-    validator = AppStoreValidator(bundle_id)
+    auto_retry_wrong_env_request=False # if True, automatically query sandbox endpoint if
+                                       # validation fails on production endpoint
+    validator = AppStoreValidator(bundle_id, auto_retry_wrong_env_request=auto_retry_wrong_env_request)
 
     try:
-        validation_result = validator.validate('receipt', 'optional-shared-secret')
+        exclude_old_transactions=False # if True, include only the latest renewal transaction
+        validation_result = validator.validate('receipt', 'optional-shared-secret', exclude_old_transactions=exclude_old_transactions)
     except InAppPyValidationError as ex:
         # handle validation error
         response_from_apple = ex.raw_response  # contains actual response from AppStore service.
         pass
+
+
 
 App Store Response (`validation_result` / `raw_response`) Sample:
 -----------------------------------------------------------------

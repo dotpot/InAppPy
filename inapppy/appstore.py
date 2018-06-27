@@ -55,17 +55,21 @@ class AppStoreValidator(object):
         except (ValueError, RequestException):
             raise InAppPyValidationError('HTTP error')
 
-    def validate(self, receipt, shared_secret=None):
+    def validate(self, receipt, shared_secret=None, exclude_old_transactions=False):
         """ Validates receipt against apple services.
 
         :param receipt: receipt
         :param shared_secret: optional shared secret.
+        :param exclude_old_transactions: optional to include only the latest renewal transaction
         :return: validation result or exception.
         """
         receipt_json = {'receipt-data': receipt}
 
         if shared_secret:
             receipt_json['password'] = shared_secret
+
+        if exclude_old_transactions:
+            receipt_json['exclude-old-transcations'] = True
 
         # Do a request.
         api_response = self.post_json(receipt_json)
