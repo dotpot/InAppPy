@@ -55,6 +55,7 @@ App Store (validates `receipt` using optional `shared-secret` against iTunes ser
     except InAppPyValidationError as ex:
         # handle validation error
         response_from_apple = ex.raw_response  # contains actual response from AppStore service.
+        error_message = ex.error_message       # contains error message translated from error code
         pass
 
 
