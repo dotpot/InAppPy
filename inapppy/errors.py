@@ -9,11 +9,3 @@ class InAppPyValidationError(Exception):
 
 class GoogleError(InAppPyValidationError):
     pass
-
-
-class GoogleCanceled(GoogleError):
-    pass
-
-
-class GoogleExpired(GoogleError):
-    pass

@@ -8,7 +8,7 @@ import httplib2
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
 
-from inapppy.errors import InAppPyValidationError, GoogleCanceled, GoogleExpired
+from inapppy.errors import InAppPyValidationError, GoogleError
 
 purchase_state_ok = 0
 
@@ -85,20 +85,24 @@ class GooglePlayVerifier:
         return http
 
 
+    def get_subscriptions(self, purchase_token, product_sku, service):
+        return service.purchases().subscriptions().get(
+            packageName=self.bundle_id,
+            subscriptionId=product_sku,
+            token=purchase_token
+        ).execute(http=self.http)
+
+
     def verify(self, purchase_token, product_sku, is_subscription=False):
         service = build("androidpublisher", "v3", http=self.http)
         if is_subscription:
-            result = service.purchases().subscriptions().get(
-                packageName=self.bundle_id,
-                subscriptionId=product_sku,
-                token=purchase_token
-            ).execute(http=self.http)
-            cancel_reason = int(result.get('cancelReason', 0))
+            subscriptions = self.get_subscriptions(purchase_token, product_sku, service)
+            cancel_reason = int(subscriptions.get('cancelReason', 0))
             if cancel_reason != 0:
-                raise GoogleCanceled(result)
-            ms_timestamp = result.get('expiryTimeMillis', 0)
+                raise GoogleError('Subscription is canceled', subscriptions)
+            ms_timestamp = subscriptions.get('expiryTimeMillis', 0)
             if _ms_timestamp_expired(ms_timestamp):
-                raise GoogleExpired(result)
+                raise GoogleError('Subscription expired', subscriptions)
         else:
             raise NotImplementedError()
-        return result
+        return subscriptions
