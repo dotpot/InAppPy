@@ -1,0 +1,6 @@
+rsa==4.0
+requests==2.19
+httplib2==0.11.3
+google-api-python-client==1.7.4
+# oauth2client 4.x.x and above don't have a crucial component for our purposes
+oauth2client==3.0.0
