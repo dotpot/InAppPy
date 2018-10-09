@@ -63,9 +63,5 @@ LICENSE
 Pipfile
 Pipfile.lock
 README.rst
-inapppy/__init__.py
-inapppy/errors.py
-inapppy/googleplay.py
 setup.py
-tests/
 tox.ini
