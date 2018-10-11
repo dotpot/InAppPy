@@ -37,6 +37,38 @@ Google Play (validates `receipt` against provided `signature` using RSA):
         # handle validation error
         pass
 
+Google Play verification:
+-------------------------------------------------------------------------
+.. code:: python
+
+    from inapppy import GooglePlayVerifier, errors
+
+
+    def google_validator(in_receipt):
+        """
+        Accepts receipt, validates in Google.
+        """
+        purchase_token = receipt['purchaseToken']
+        product_sku = receipt['productId']
+        verifier = GooglePlayValidator(
+            GOOGLE_BUNDLE_ID,
+            GOOGLE_SERVICE_ACCOUNT_KEY_FILE,
+        )
+        response = {'valid': False, 'transactions': []}
+        try:
+            result = verifier.verify(
+                purchase_token,
+                product_sku
+            )
+            response['valid'] = True
+            response['transactions'].append(
+                (result['orderId'], product_sku)
+            )
+        except errors.GoogleError as exc:
+            logging.error('Purchase validation failed {}'.format(exc))
+        return response
+
+
 App Store (validates `receipt` using optional `shared-secret` against iTunes service):
 --------------------------------------------------------------------------------------
 .. code:: python
