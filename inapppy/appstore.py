@@ -26,7 +26,7 @@ class AppStoreValidator(object):
     url = None
     auto_retry_wrong_env_request = False
 
-    def __init__(self, bundle_id, sandbox=False, auto_retry_wrong_env_request=False):
+    def __init__(self, bundle_id, sandbox=False, auto_retry_wrong_env_request=False, http_timeout=None):
         """ Constructor for AppStoreValidator
 
         :param bundle_id: apple bundle id
@@ -35,6 +35,7 @@ class AppStoreValidator(object):
         """
         self.bundle_id = bundle_id
         self.sandbox = sandbox
+        self.http_timeout = http_timeout
 
         if not self.bundle_id:
             raise InAppPyValidationError('`bundle_id` cannot be empty')
@@ -51,7 +52,7 @@ class AppStoreValidator(object):
         self._change_url_by_sandbox()
 
         try:
-            return requests.post(self.url, json=request_json).json()
+            return requests.post(self.url, json=request_json, timeout=self.http_timeout).json()
         except (ValueError, RequestException):
             raise InAppPyValidationError('HTTP error')
 
