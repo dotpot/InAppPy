@@ -22,7 +22,6 @@ def make_pem(public_key):
 
 
 class GooglePlayValidator(object):
-
     def __init__(self, bundle_id, api_key):
         self.bundle_id = bundle_id
         if not self.bundle_id:
@@ -67,13 +66,12 @@ def _ms_timestamp_expired(ms_timestamp):
     return dt < now
 
 
-class GooglePlayVerifier:
-    def __init__(self, bundle_id, private_key_path, http_timeout):
+class GooglePlayVerifier(object):
+    def __init__(self, bundle_id, private_key_path, http_timeout=15):
         self.bundle_id = bundle_id
         self.private_key_path = private_key_path
         self.http_timeout = http_timeout
         self.http = self._authorize()
-
 
     def _authorize(self):
         http = httplib2.Http(timeout=self.http_timeout)
@@ -84,14 +82,12 @@ class GooglePlayVerifier:
         http = credentials.authorize(http)
         return http
 
-
     def get_subscriptions(self, purchase_token, product_sku, service):
         return service.purchases().subscriptions().get(
             packageName=self.bundle_id,
             subscriptionId=product_sku,
             token=purchase_token
         ).execute(http=self.http)
-
 
     def verify(self, purchase_token, product_sku, is_subscription=False):
         service = build("androidpublisher", "v3", http=self.http)
