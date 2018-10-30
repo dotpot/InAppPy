@@ -41,7 +41,7 @@ Google Play verification:
 -------------------------------------------------------------------------
 .. code:: python
 
-    from inapppy import GooglePlayVerifier, errors
+    from inapppy import GooglePlayValidator, errors
 
 
     def google_validator(in_receipt):
