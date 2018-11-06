@@ -50,7 +50,7 @@ Google Play verification:
         """
         purchase_token = receipt['purchaseToken']
         product_sku = receipt['productId']
-        verifier = GooglePlayValidator(
+        verifier = GooglePlayVerifier(
             GOOGLE_BUNDLE_ID,
             GOOGLE_SERVICE_ACCOUNT_KEY_FILE,
         )
