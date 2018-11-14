@@ -1,0 +1,9 @@
+[flake8]
+jobs = 16
+exclude = build,dist,.tox,.pytest_cache,__pycache__
+max-line-length = 120
+
+max-complexity = 6
+
+application-import-names = app,helpers,tests
+import-order-style = pycharm
