@@ -9,6 +9,9 @@ google-api-python-client = "*"
 "oauth2client" = "*"
 
 [dev-packages]
+twine = "*"
+setuptools = "*"
+wheel = "*"
 
 [requires]
 python_version = "3.6"
