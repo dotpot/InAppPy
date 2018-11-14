@@ -82,23 +82,35 @@ class GooglePlayVerifier(object):
         http = credentials.authorize(http)
         return http
 
-    def get_subscriptions(self, purchase_token, product_sku, service):
+    def check_purchase_subscription(self, purchase_token, product_sku, service):
         return service.purchases().subscriptions().get(
             packageName=self.bundle_id,
             subscriptionId=product_sku,
             token=purchase_token
         ).execute(http=self.http)
 
+    def check_purchase_product(self, purchase_token, product_sku, service):
+        return service.purchases().products().get(
+            packageName=self.bundle_id,
+            productId=product_sku,
+            token=purchase_token
+        ).execute(http=self.http)
+
     def verify(self, purchase_token, product_sku, is_subscription=False):
         service = build("androidpublisher", "v3", http=self.http)
         if is_subscription:
-            subscriptions = self.get_subscriptions(purchase_token, product_sku, service)
-            cancel_reason = int(subscriptions.get('cancelReason', 0))
+            result = self.check_purchase_subscription(purchase_token, product_sku, service)
+            cancel_reason = int(result.get('cancelReason', 0))
             if cancel_reason != 0:
-                raise GoogleError('Subscription is canceled', subscriptions)
-            ms_timestamp = subscriptions.get('expiryTimeMillis', 0)
+                raise GoogleError('Subscription is canceled', result)
+            ms_timestamp = result.get('expiryTimeMillis', 0)
             if _ms_timestamp_expired(ms_timestamp):
-                raise GoogleError('Subscription expired', subscriptions)
+                raise GoogleError('Subscription expired', result)
         else:
-            raise NotImplementedError()
-        return subscriptions
+            result = self.check_purchase_product(purchase_token, product_sku, service)
+            purchase_state = int(result.get('purchaseState', 1))
+
+            if purchase_state != 0:
+                raise GoogleError('Purchase cancelled', result)
+
+        return result
