@@ -94,4 +94,3 @@ def test_appstore_auto_retry_wrong_env_request():
             assert mock_method.call_count == 1
             assert validator.url == 'https://buy.itunes.apple.com/verifyReceipt'
             assert mock_method.call_args[0][0] == {'receipt-data': 'test-receipt', 'password': 'shared-secret'}
-

@@ -1,7 +1,7 @@
-from inapppy.errors import InAppPyValidationError
-
-from requests.exceptions import RequestException
 import requests
+from requests.exceptions import RequestException
+
+from inapppy.errors import InAppPyValidationError
 
 # https://developer.apple.com/library/content/releasenotes/General/ValidateAppStoreReceipt/Chapters/ValidateRemotely.html
 # `Table 2-1  Status codes`
@@ -20,26 +20,24 @@ api_result_errors = {
 }
 
 
-class AppStoreValidator(object):
-    bundle_id = None
-    sandbox = None
-    url = None
-    auto_retry_wrong_env_request = False
-
-    def __init__(self, bundle_id, sandbox=False, auto_retry_wrong_env_request=False, http_timeout=None):
+class AppStoreValidator:
+    def __init__(self,
+                 bundle_id: str,
+                 sandbox: bool = False,
+                 auto_retry_wrong_env_request: bool = False,
+                 http_timeout: int = None):
         """ Constructor for AppStoreValidator
 
         :param bundle_id: apple bundle id
         :param sandbox: sandbox mode ?
         :param auto_retry_wrong_env_request: auto retry on wrong env ?
         """
+        if not bundle_id:
+            raise InAppPyValidationError('bundle_id cannot be empty')
+
         self.bundle_id = bundle_id
         self.sandbox = sandbox
         self.http_timeout = http_timeout
-
-        if not self.bundle_id:
-            raise InAppPyValidationError('`bundle_id` cannot be empty')
-
         self.auto_retry_wrong_env_request = auto_retry_wrong_env_request
 
         self._change_url_by_sandbox()
@@ -48,7 +46,7 @@ class AppStoreValidator(object):
         self.url = ('https://sandbox.itunes.apple.com/verifyReceipt' if self.sandbox else
                     'https://buy.itunes.apple.com/verifyReceipt')
 
-    def post_json(self, request_json):
+    def post_json(self, request_json: dict) -> dict:
         self._change_url_by_sandbox()
 
         try:
@@ -56,7 +54,7 @@ class AppStoreValidator(object):
         except (ValueError, RequestException):
             raise InAppPyValidationError('HTTP error')
 
-    def validate(self, receipt, shared_secret=None, exclude_old_transactions=False):
+    def validate(self, receipt: str, shared_secret: str = None, exclude_old_transactions: bool = False) -> dict:
         """ Validates receipt against apple services.
 
         :param receipt: receipt
@@ -72,7 +70,6 @@ class AppStoreValidator(object):
         if exclude_old_transactions:
             receipt_json['exclude-old-transcations'] = True
 
-        # Do a request.
         api_response = self.post_json(receipt_json)
         status = api_response['status']
 

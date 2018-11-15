@@ -1,31 +1,39 @@
+import base64
 import datetime
 import json
-import base64
 
-import rsa
 import httplib2
-
-from googleapiclient.discovery import build
+import rsa
+from googleapiclient.discovery import (
+    build,
+)
 from oauth2client.service_account import ServiceAccountCredentials
 
-from inapppy.errors import InAppPyValidationError, GoogleError
+from inapppy.errors import (
+    GoogleError,
+    InAppPyValidationError,
+)
 
-purchase_state_ok = 0
 
-
-def make_pem(public_key):
+def make_pem(public_key: str):
     return '\n'.join((
         '-----BEGIN PUBLIC KEY-----',
-        '\n'.join(public_key[i:i+64] for i in range(0, len(public_key), 64)),
+        '\n'.join(public_key[i:i + 64] for i in range(0, len(public_key), 64)),
         '-----END PUBLIC KEY-----'
     ))
 
 
-class GooglePlayValidator(object):
-    def __init__(self, bundle_id, api_key):
+class GooglePlayValidator:
+    purchase_state_ok = 0
+
+    def __init__(self, bundle_id: str, api_key: str, default_valid_purchase_state: int = 0):
+        if not bundle_id:
+            raise InAppPyValidationError('bundle_id cannot be empty.')
+        if not api_key:
+            raise InAppPyValidationError('api_key cannot be empty.')
+
         self.bundle_id = bundle_id
-        if not self.bundle_id:
-            raise InAppPyValidationError('`bundle_id` cannot be empty.')
+        self.purchase_state_ok = default_valid_purchase_state
 
         pem = make_pem(api_key)
         try:
@@ -33,10 +41,8 @@ class GooglePlayValidator(object):
         except TypeError:
             raise InAppPyValidationError('Bad api key')
 
-    def validate(self, receipt, signature):
-        ok = self._validate_signature(receipt, signature)
-
-        if not ok:
+    def validate(self, receipt: str, signature: str) -> dict:
+        if not self._validate_signature(receipt, signature):
             raise InAppPyValidationError('Bad signature')
 
         try:
@@ -45,25 +51,19 @@ class GooglePlayValidator(object):
             if receipt_json['packageName'] != self.bundle_id:
                 raise InAppPyValidationError('Bundle id mismatch')
 
-            if receipt_json['purchaseState'] != purchase_state_ok:
+            if receipt_json['purchaseState'] != self.purchase_state_ok:
                 raise InAppPyValidationError('Item is not purchased')
 
             return receipt_json
         except (KeyError, ValueError):
             raise InAppPyValidationError('Bad receipt')
 
-    def _validate_signature(self, receipt, signature):
+    def _validate_signature(self, receipt: str, signature: str) -> bool:
         try:
             sig = base64.standard_b64decode(signature)
             return rsa.verify(receipt.encode(), sig, self.public_key)
         except (rsa.VerificationError, TypeError, ValueError, BaseException):
             return False
-
-
-def _ms_timestamp_expired(ms_timestamp):
-    now = datetime.datetime.utcnow()
-    dt = datetime.datetime.fromtimestamp(int(ms_timestamp) / 1000)
-    return dt < now
 
 
 class GooglePlayVerifier(object):
@@ -72,6 +72,12 @@ class GooglePlayVerifier(object):
         self.private_key_path = private_key_path
         self.http_timeout = http_timeout
         self.http = self._authorize()
+
+    @staticmethod
+    def _ms_timestamp_expired(ms_timestamp: int) -> bool:
+        now = datetime.datetime.utcnow()
+        dt = datetime.datetime.fromtimestamp(ms_timestamp / 1000)
+        return dt < now
 
     def _authorize(self):
         http = httplib2.Http(timeout=self.http_timeout)
@@ -82,29 +88,30 @@ class GooglePlayVerifier(object):
         http = credentials.authorize(http)
         return http
 
-    def check_purchase_subscription(self, purchase_token, product_sku, service):
+    def check_purchase_subscription(self, purchase_token: str, product_sku: str, service) -> dict:
         return service.purchases().subscriptions().get(
             packageName=self.bundle_id,
             subscriptionId=product_sku,
             token=purchase_token
         ).execute(http=self.http)
 
-    def check_purchase_product(self, purchase_token, product_sku, service):
+    def check_purchase_product(self, purchase_token: str, product_sku: str, service) -> dict:
         return service.purchases().products().get(
             packageName=self.bundle_id,
             productId=product_sku,
             token=purchase_token
         ).execute(http=self.http)
 
-    def verify(self, purchase_token, product_sku, is_subscription=False):
+    def verify(self, purchase_token: str, product_sku: str, is_subscription=False) -> dict:
         service = build("androidpublisher", "v3", http=self.http)
         if is_subscription:
             result = self.check_purchase_subscription(purchase_token, product_sku, service)
             cancel_reason = int(result.get('cancelReason', 0))
             if cancel_reason != 0:
                 raise GoogleError('Subscription is canceled', result)
+
             ms_timestamp = result.get('expiryTimeMillis', 0)
-            if _ms_timestamp_expired(ms_timestamp):
+            if self._ms_timestamp_expired(ms_timestamp):
                 raise GoogleError('Subscription expired', result)
         else:
             result = self.check_purchase_product(purchase_token, product_sku, service)

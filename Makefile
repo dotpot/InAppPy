@@ -13,4 +13,7 @@ release:
 test:
 	tox
 
+lint:
+	pipenv run flake8
+
 rebuild: clean build
