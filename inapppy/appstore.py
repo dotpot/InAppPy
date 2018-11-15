@@ -21,12 +21,6 @@ api_result_errors = {
 
 
 class AppStoreValidator:
-    bundle_id: str = None
-    sandbox: bool = None
-    url: str = None
-    auto_retry_wrong_env_request: bool = False
-    http_timeout: int = None
-
     def __init__(self,
                  bundle_id: str,
                  sandbox: bool = False,

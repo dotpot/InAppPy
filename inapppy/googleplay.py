@@ -24,7 +24,7 @@ def make_pem(public_key: str):
 
 
 class GooglePlayValidator:
-    purchase_state_ok: int = 0
+    purchase_state_ok = 0
 
     def __init__(self, bundle_id: str, api_key: str, default_valid_purchase_state: int = 0):
         if not bundle_id:
