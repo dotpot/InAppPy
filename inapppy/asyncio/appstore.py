@@ -26,12 +26,12 @@ class AppStoreValidator(AppStoreValidator):
             self._session = ClientSession()
 
         try:
-            async with self.session.post(
+            async with self._session.post(
                 self.url,
                 json=request_json,
                 timeout=ClientTimeout(total=self.http_timeout),
             ) as resp:
-                return await resp.json()
+                return await resp.json(content_type=None)
         except (ValueError, ClientError):
             raise InAppPyValidationError("HTTP error")
 
