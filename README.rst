@@ -44,7 +44,7 @@ Google Play verification:
     from inapppy import GooglePlayVerifier, errors
 
 
-    def google_validator(in_receipt):
+    def google_validator(receipt):
         """
         Accepts receipt, validates in Google.
         """
