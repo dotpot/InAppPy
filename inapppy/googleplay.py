@@ -74,9 +74,9 @@ class GooglePlayVerifier(object):
         self.http = self._authorize()
 
     @staticmethod
-    def _ms_timestamp_expired(ms_timestamp: int) -> bool:
+    def _ms_timestamp_expired(ms_timestamp: str) -> bool:
         now = datetime.datetime.utcnow()
-        dt = datetime.datetime.fromtimestamp(ms_timestamp / 1000)
+        dt = datetime.datetime.fromtimestamp(int(ms_timestamp) / 1000)
         return dt < now
 
     def _authorize(self):
