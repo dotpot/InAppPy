@@ -32,6 +32,8 @@ Google Play (validates `receipt` against provided `signature` using RSA):
     validator = GooglePlayValidator(bundle_id, api_key)
 
     try:
+        # receipt means `androidData` in result of purchase
+        # signature means `signatureAndroid` in result of purchase
         validation_result = validator.validate('receipt', 'signature')
     except InAppPyValidationError:
         # handle validation error
