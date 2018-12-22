@@ -7,6 +7,7 @@ name = "pypi"
 requests = "*"
 google-api-python-client = "*"
 "oauth2client" = "*"
+aiohttp = "*"
 
 [dev-packages]
 twine = "*"
@@ -16,6 +17,7 @@ pylint = "*"
 "flake8" = "*"
 "flake8-bugbear" = "*"
 "flake8-comprehensions" = "*"
+pytest-asyncio = "*"
 
 [requires]
 python_version = "3.6"
