@@ -169,3 +169,18 @@ App Store Response (`validation_result` / `raw_response`) Sample:
             }],
         "environment": "Sandbox"
     }
+
+
+Development
+===========
+
+.. code:: bash
+
+    # setup project
+    make setup
+
+    # check for lint errors
+    make lint
+
+    # run tests
+    make test
