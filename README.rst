@@ -172,6 +172,7 @@ App Store Response (`validation_result` / `raw_response`) Sample:
         "environment": "Sandbox"
     }
 
+
 App Store, asyncio version (available in the inapppy.asyncio package)
 ---------------------------------------------------------------------
 .. code:: python
@@ -192,3 +193,19 @@ App Store, asyncio version (available in the inapppy.asyncio package)
         # handle validation error
         response_from_apple = ex.raw_response  # contains actual response from AppStore service.
         pass
+
+
+
+Development
+===========
+
+.. code:: bash
+
+    # setup project
+    make setup
+
+    # check for lint errors
+    make lint
+
+    # run tests
+    make test
