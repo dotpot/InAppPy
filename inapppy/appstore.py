@@ -63,7 +63,7 @@ class AppStoreValidator:
             receipt_json["password"] = shared_secret
 
         if exclude_old_transactions:
-            receipt_json["exclude-old-transcations"] = True
+            receipt_json["exclude-old-transactions"] = True
 
         return receipt_json
 
