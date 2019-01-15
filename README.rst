@@ -6,7 +6,7 @@ InAppPy
     :target: https://travis-ci.org/dotpot/InAppPy
 .. |pypi| image:: https://badge.fury.io/py/inapppy.svg
     :target: https://badge.fury.io/py/inapppy
-.. image:: https://img.shields.io/pypi/dm/inapppy.svg
+.. |pypi-downloads| image:: https://img.shields.io/pypi/dm/inapppy.svg
     :target: https://pypi.python.org/pypi/inapppy
 
 In-app purchase validation library for Apple AppStore and GooglePlay.
