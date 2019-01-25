@@ -81,7 +81,7 @@ class GooglePlayVerifier(object):
         if not ms_timestamp:
             return True
 
-        ms_timestamp_value = int(ms_timestamp / 1000)
+        ms_timestamp_value = int(ms_timestamp) / 1000
 
         # return if it's 0, expired.
         if not ms_timestamp_value:
