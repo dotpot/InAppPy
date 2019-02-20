@@ -17,17 +17,24 @@ class AppStoreValidator(AppStoreValidator):
         super().__init__(
             bundle_id, sandbox, auto_retry_wrong_env_request, http_timeout
         )
+        self._session = None
+
+    async def __aenter__(self):
+        self._session = ClientSession()
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self._session.close()
+        self._session = None
 
     async def post_json(self, request_json: dict) -> dict:
         self._change_url_by_sandbox()
         try:
-            async with ClientSession() as session:
-                async with session.post(
-                    self.url,
-                    json=request_json,
-                    timeout=ClientTimeout(total=self.http_timeout)
-                ) as resp:
-                    return await resp.json(content_type=None)
+            async with self._session.post(
+                self.url,
+                json=request_json,
+                timeout=ClientTimeout(total=self.http_timeout)
+            ) as resp:
+                return await resp.json(content_type=None)
         except (ValueError, ClientError):
             raise InAppPyValidationError("HTTP error")
 
