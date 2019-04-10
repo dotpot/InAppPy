@@ -39,9 +39,7 @@ async def test_appstore_validate_simple():
         return {"status": 0}
 
     with patch.object(AppStoreValidator, "post_json", new=post_json):
-        await validator.validate(
-            receipt="test-receipt", shared_secret="shared-secret"
-        )
+        await validator.validate(receipt="test-receipt", shared_secret="shared-secret")
         assert validator.url == "https://buy.itunes.apple.com/verifyReceipt"
 
     with patch.object(AppStoreValidator, "post_json", new=post_json_no_secret):
@@ -55,10 +53,7 @@ async def test_appstore_validate_sandbox():
     assert validator is not None
 
     async def post_json(self, receipt):
-        assert receipt == {
-            "receipt-data": "test-receipt",
-            "password": "shared-secret",
-        }
+        assert receipt == {"receipt-data": "test-receipt", "password": "shared-secret"}
         return {"status": 0}
 
     async def post_json_no_secret(self, receipt):
@@ -67,18 +62,12 @@ async def test_appstore_validate_sandbox():
         return {"status": 0}
 
     with patch.object(AppStoreValidator, "post_json", new=post_json):
-        await validator.validate(
-            receipt="test-receipt", shared_secret="shared-secret"
-        )
-        assert (
-            validator.url == "https://sandbox.itunes.apple.com/verifyReceipt"
-        )
+        await validator.validate(receipt="test-receipt", shared_secret="shared-secret")
+        assert validator.url == "https://sandbox.itunes.apple.com/verifyReceipt"
 
     with patch.object(AppStoreValidator, "post_json", new=post_json_no_secret):
         await validator.validate(receipt="test-receipt")
-        assert (
-            validator.url == "https://sandbox.itunes.apple.com/verifyReceipt"
-        )
+        assert validator.url == "https://sandbox.itunes.apple.com/verifyReceipt"
 
 
 @pytest.mark.asyncio
@@ -89,10 +78,7 @@ async def test_appstore_validate_attach_raw_response_to_the_exception():
     raw_response = {"status": 21000, "foo": "bar"}
 
     async def post_json(self, receipt):
-        assert receipt == {
-            "receipt-data": "test-receipt",
-            "password": "shared-secret",
-        }
+        assert receipt == {"receipt-data": "test-receipt", "password": "shared-secret"}
         return raw_response
 
     with pytest.raises(InAppPyValidationError) as ex:
@@ -100,9 +86,7 @@ async def test_appstore_validate_attach_raw_response_to_the_exception():
             await validator.validate(
                 receipt="test-receipt", shared_secret="shared-secret"
             )
-            assert (
-                validator.url == "https://buy.itunes.apple.com/verifyReceipt"
-            )
+            assert validator.url == "https://buy.itunes.apple.com/verifyReceipt"
             assert ex.raw_response is not None
             assert ex.raw_response == raw_response
 
@@ -110,9 +94,7 @@ async def test_appstore_validate_attach_raw_response_to_the_exception():
 @pytest.mark.asyncio
 async def test_appstore_auto_retry_wrong_env_request():
     validator = AppStoreValidator(
-        bundle_id="test-bundle-id",
-        sandbox=False,
-        auto_retry_wrong_env_request=True,
+        bundle_id="test-bundle-id", sandbox=False, auto_retry_wrong_env_request=True
     )
     assert validator is not None
     assert not validator.sandbox
@@ -121,10 +103,7 @@ async def test_appstore_auto_retry_wrong_env_request():
     raw_response = {"status": 21007, "foo": "bar"}
 
     async def post_json(self, receipt):
-        assert receipt == {
-            "receipt-data": "test-receipt",
-            "password": "shared-secret",
-        }
+        assert receipt == {"receipt-data": "test-receipt", "password": "shared-secret"}
         return raw_response
 
     with pytest.raises(InAppPyValidationError):
@@ -132,18 +111,13 @@ async def test_appstore_auto_retry_wrong_env_request():
             await validator.validate(
                 receipt="test-receipt", shared_secret="shared-secret"
             )
-            assert (
-                validator.url == "https://buy.itunes.apple.com/verifyReceipt"
-            )
+            assert validator.url == "https://buy.itunes.apple.com/verifyReceipt"
             assert validator.sandbox is True
 
     raw_response = {"status": 21008, "foo": "bar"}
 
     async def post_json(self, receipt):
-        assert receipt == {
-            "receipt-data": "test-receipt",
-            "password": "shared-secret",
-        }
+        assert receipt == {"receipt-data": "test-receipt", "password": "shared-secret"}
         return raw_response
 
     with pytest.raises(InAppPyValidationError):
@@ -152,6 +126,4 @@ async def test_appstore_auto_retry_wrong_env_request():
                 receipt="test-receipt", shared_secret="shared-secret"
             )
             assert validator.sandbox is False
-            assert (
-                validator.url == "https://buy.itunes.apple.com/verifyReceipt"
-            )
+            assert validator.url == "https://buy.itunes.apple.com/verifyReceipt"

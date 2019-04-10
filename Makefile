@@ -13,7 +13,12 @@ release:
 test:
 	tox
 
+black:
+	pipenv run black .
+
 lint:
 	pipenv run flake8
+
+runall: black lint test clean build
 
 rebuild: clean build

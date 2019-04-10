@@ -14,9 +14,7 @@ class AppStoreValidator(AppStoreValidator):
         auto_retry_wrong_env_request: bool = False,
         http_timeout: int = None,
     ):
-        super().__init__(
-            bundle_id, sandbox, auto_retry_wrong_env_request, http_timeout
-        )
+        super().__init__(bundle_id, sandbox, auto_retry_wrong_env_request, http_timeout)
         self._session = None
 
     async def __aenter__(self):
@@ -32,7 +30,7 @@ class AppStoreValidator(AppStoreValidator):
             async with self._session.post(
                 self.url,
                 json=request_json,
-                timeout=ClientTimeout(total=self.http_timeout)
+                timeout=ClientTimeout(total=self.http_timeout),
             ) as resp:
                 return await resp.json(content_type=None)
         except (ValueError, ClientError):

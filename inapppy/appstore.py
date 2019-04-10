@@ -14,12 +14,8 @@ api_result_errors = {
     21005: InAppPyValidationError("Server is unavailable"),
     21006: InAppPyValidationError("Subscription has expired"),
     # two following errors can use auto_retry_wrong_env_request.
-    21007: InAppPyValidationError(
-        "Sandbox receipt was sent to the production env"
-    ),
-    21008: InAppPyValidationError(
-        "Production receipt was sent to the sandbox env"
-    ),
+    21007: InAppPyValidationError("Sandbox receipt was sent to the production env"),
+    21008: InAppPyValidationError("Production receipt was sent to the sandbox env"),
 }
 
 
