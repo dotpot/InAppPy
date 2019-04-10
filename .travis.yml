@@ -4,3 +4,11 @@ python:
   - "3.5"
 install: pip install tox-travis
 script: tox
+deploy:
+  skip_existing: true
+  provider: pypi
+  user: "dotpot"
+  password:
+    secure: nwV34OYcGFZQa9YXdAyb0QB1KBfHc4/6Kt98L4wrJnTI5RThd0yuzAhkUPNXgN47wh6Et0gMsf5vXfLBPR+9mc22w7+U1aY8WkQGRMetIKtgDc2pgQEPc/DggiFDXeK1w65cpq2Bgra5chwwfi2nB9dAqYWdQnjGTak1krmw5XH8Km73PwtY2In8fbl7kedKzVkUdtpGKXG/ih3uaqgjDjUaCkDVaKVj54LR2TeTVXqkxjjocbnIh8m7Hc4S850N3rsYZIBebEsevPxWc52D/GWTVV6ijCON763Ge29XUnhQWJ7rN0jITVuWe5F55fLO8tazARrvMhpYdS+SLfO/Atn9Kk6lWah2KzaSQ1omuk7hBxZRMNZfRb08AbDimABIwxIpvzIhdBa7pwMlEWu2OyYNmNzUbMyMN3nkcJPVTEV9KqgCTY+TVqQFItgrmYFl4MLKPzTU+1CI98iQYNCDDFfXlWsEaayXGkbepfpTnIurGQ0dTfNjot6NVb7U+rs+OeoEO6O1aBMVGD1wcVwjIrH5gpPC91JOamwzV/XrkW1QLufgqPVzU7jip0gHXblVtDD3Zi1SUCVyY1FCt2fZ86mHz/qH8wNmFa2rkKM5NOO+6oIhmwCN14uid6OR3m8OL3yCSv3HMbe3cJvPf5Kui4BWr8of4Xwjar14ssC/1KM=
+  on:
+    tags: true
