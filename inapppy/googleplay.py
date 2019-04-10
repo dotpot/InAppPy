@@ -77,7 +77,7 @@ class GooglePlayValidator:
 
 class GooglePlayVerifier:
     def __init__(self, bundle_id: str,
-                 private_key_path: str, http_timeout: int=15) -> None:
+                 private_key_path: str, http_timeout: int = 15) -> None:
         """
         Arguments:
             bundle_id: str - Also known as Android app's package name.
@@ -116,7 +116,7 @@ class GooglePlayVerifier:
 
     def check_purchase_subscription(self, purchase_token: str,
                                     product_sku: str, service) -> dict:
-        return service.purchases(). ().get(
+        return service.purchases().subscriptions().get(
             packageName=self.bundle_id,
             subscriptionId=product_sku,
             token=purchase_token
@@ -131,7 +131,7 @@ class GooglePlayVerifier:
         ).execute(http=self.http)
 
     def verify(self, purchase_token: str,
-               product_sku: str, is_subscription: bool=False) -> dict:
+               product_sku: str, is_subscription: bool = False) -> dict:
         service = build("androidpublisher", "v3", http=self.http)
 
         if is_subscription:
