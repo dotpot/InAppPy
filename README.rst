@@ -62,7 +62,8 @@ Google Play verification:
         try:
             result = verifier.verify(
                 purchase_token,
-                product_sku
+                product_sku,
+				is_subscription=True
             )
             response['valid'] = True
             response['transactions'].append(
