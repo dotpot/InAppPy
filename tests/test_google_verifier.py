@@ -3,7 +3,11 @@ import datetime
 import pytest
 from unittest.mock import patch
 
-from inapppy import googleplay, errors
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from googleapiclient.http import RequestMockBuilder, HttpMock
+
+from inapppy import googleplay, errors, GooglePlayVerifier
 
 
 def test_google_verify_subscription():
@@ -64,3 +68,17 @@ def test_google_verify_product():
             ):
                 with pytest.raises(errors.GoogleError):
                     verifier.verify("test-token", "test-product")
+
+
+def test_broken_receipt():
+    mock = HttpMock(headers={'status': 400})
+    mock.headers = {'status': 400}
+    mock.data = b'{"reason": "Bad request"}'
+
+    with patch.object(
+        googleplay.GooglePlayVerifier, "_authorize", return_value=mock
+    ):
+        verifier = GooglePlayVerifier('bundle_id', 'private_key_path')
+
+        with pytest.raises(HttpError):
+            verifier.verify('broken_purchase_token', 'product_scu')
