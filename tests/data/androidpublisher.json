@@ -1,0 +1,268 @@
+{
+  "rootUrl": "https://www.googleapis.com/",
+  "servicePath": "androidpublisher/v3/applications/",
+  "schemas": {
+    "IntroductoryPriceInfo": {
+      "id": "IntroductoryPriceInfo",
+      "type": "object",
+      "properties": {
+        "introductoryPriceAmountMicros": {
+          "type": "string",
+          "format": "int64"
+        },
+        "introductoryPriceCurrencyCode": {
+          "type": "string"
+        },
+        "introductoryPriceCycles": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "introductoryPricePeriod": {
+          "type": "string"
+        }
+      }
+    },
+    "Price": {
+      "id": "Price",
+      "type": "object",
+      "properties": {
+        "currency": {
+          "type": "string"
+        },
+        "priceMicros": {
+          "type": "string"
+        }
+      }
+    },
+    "ProductPurchase": {
+      "id": "ProductPurchase",
+      "type": "object",
+      "properties": {
+        "acknowledgementState": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "consumptionState": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "developerPayload": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "default": "androidpublisher#productPurchase"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "purchaseState": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "purchaseTimeMillis": {
+          "type": "string",
+          "format": "int64"
+        },
+        "purchaseType": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "SubscriptionCancelSurveyResult": {
+      "id": "SubscriptionCancelSurveyResult",
+      "type": "object",
+      "properties": {
+        "cancelSurveyReason": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "userInputCancelReason": {
+          "type": "string"
+        }
+      }
+    },
+    "SubscriptionPriceChange": {
+      "id": "SubscriptionPriceChange",
+      "type": "object",
+      "properties": {
+        "newPrice": {
+          "$ref": "Price"
+        },
+        "state": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "SubscriptionPurchase": {
+      "id": "SubscriptionPurchase",
+      "type": "object",
+      "properties": {
+        "acknowledgementState": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "autoRenewing": {
+          "type": "boolean"
+        },
+        "autoResumeTimeMillis": {
+          "type": "string",
+          "format": "int64"
+        },
+        "cancelReason": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "cancelSurveyResult": {
+          "$ref": "SubscriptionCancelSurveyResult"
+        },
+        "countryCode": {
+          "type": "string"
+        },
+        "developerPayload": {
+          "type": "string"
+        },
+        "emailAddress": {
+          "type": "string"
+        },
+        "expiryTimeMillis": {
+          "type": "string",
+          "format": "int64"
+        },
+        "familyName": {
+          "type": "string"
+        },
+        "givenName": {
+          "type": "string"
+        },
+        "introductoryPriceInfo": {
+          "$ref": "IntroductoryPriceInfo"
+        },
+        "kind": {
+          "type": "string",
+          "default": "androidpublisher#subscriptionPurchase"
+        },
+        "linkedPurchaseToken": {
+          "type": "string"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "paymentState": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "priceAmountMicros": {
+          "type": "string",
+          "format": "int64"
+        },
+        "priceChange": {
+          "$ref": "SubscriptionPriceChange"
+        },
+        "priceCurrencyCode": {
+          "type": "string"
+        },
+        "profileId": {
+          "type": "string"
+        },
+        "profileName": {
+          "type": "string"
+        },
+        "purchaseType": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "startTimeMillis": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userCancellationTimeMillis": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    }
+  },
+  "resources": {
+    "purchases": {
+      "resources": {
+        "products": {
+          "methods": {
+            "get": {
+              "id": "androidpublisher.purchases.products.get",
+              "path": "{packageName}/purchases/products/{productId}/tokens/{token}",
+              "httpMethod": "GET",
+              "parameters": {
+                "packageName": {
+                  "type": "string",
+                  "required": true,
+                  "location": "path"
+                },
+                "productId": {
+                  "type": "string",
+                  "required": true,
+                  "location": "path"
+                },
+                "token": {
+                  "type": "string",
+                  "required": true,
+                  "location": "path"
+                }
+              },
+              "parameterOrder": [
+                "packageName",
+                "productId",
+                "token"
+              ],
+              "response": {
+                "$ref": "ProductPurchase"
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/androidpublisher"
+              ]
+            }
+          }
+        },
+        "subscriptions": {
+          "methods": {
+            "get": {
+              "id": "androidpublisher.purchases.subscriptions.get",
+              "path": "{packageName}/purchases/subscriptions/{subscriptionId}/tokens/{token}",
+              "httpMethod": "GET",
+              "parameters": {
+                "packageName": {
+                  "type": "string",
+                  "required": true,
+                  "location": "path"
+                },
+                "subscriptionId": {
+                  "type": "string",
+                  "required": true,
+                  "location": "path"
+                },
+                "token": {
+                  "type": "string",
+                  "required": true,
+                  "location": "path"
+                }
+              },
+              "parameterOrder": [
+                "packageName",
+                "subscriptionId",
+                "token"
+              ],
+              "response": {
+                "$ref": "SubscriptionPurchase"
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/androidpublisher"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

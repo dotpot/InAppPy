@@ -1,9 +1,12 @@
 import datetime
-
-import pytest
+import os
 from unittest.mock import patch
 
-from inapppy import googleplay, errors
+import httplib2
+import pytest
+from googleapiclient.http import HttpMock, RequestMockBuilder
+
+from inapppy import googleplay, errors, GooglePlayVerifier
 
 
 def test_google_verify_subscription():
@@ -64,3 +67,47 @@ def test_google_verify_product():
             ):
                 with pytest.raises(errors.GoogleError):
                     verifier.verify("test-token", "test-product")
+
+
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+
+
+def datafile(filename):
+    return os.path.join(DATA_DIR, filename)
+
+
+def test_broken_receipt():
+    with patch.object(
+        googleplay.GooglePlayVerifier, "_authorize", return_value=None
+    ):
+        verifier = GooglePlayVerifier('bundle_id', 'private_key_path')
+
+        auth = HttpMock(datafile("androidpublisher.json"), headers={'status': 200})
+
+        request_mock_builder = RequestMockBuilder(
+            {
+                'androidpublisher.purchases.products.get': (
+                    httplib2.Response({'status': 400, "reason": b"Bad request"}),
+                    b'{"reason": "Bad request"}',
+                )
+            }
+        )
+        build_mock_result = googleplay.build("androidpublisher", "v3", http=auth, requestBuilder=request_mock_builder)
+
+        with patch.object(googleplay, "build", return_value=build_mock_result):
+            with pytest.raises(errors.GoogleError, match="Bad request"):
+                verifier.verify('broken_purchase_token', 'product_scu')
+
+        request_mock_builder = RequestMockBuilder(
+            {
+                'androidpublisher.purchases.subscriptions.get': (
+                    httplib2.Response({'status': 400, "reason": b"Bad request"}),
+                    b'{"reason": "Bad request"}',
+                )
+            }
+        )
+        build_mock_result = googleplay.build("androidpublisher", "v3", http=auth, requestBuilder=request_mock_builder)
+
+        with patch.object(googleplay, "build", return_value=build_mock_result):
+            with pytest.raises(errors.GoogleError, match="Bad request"):
+                verifier.verify('broken_purchase_token', 'product_scu', is_subscription=True)

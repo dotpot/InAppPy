@@ -5,6 +5,7 @@ import json
 import httplib2
 import rsa
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from oauth2client.service_account import ServiceAccountCredentials
 
 from inapppy.errors import GoogleError, InAppPyValidationError
@@ -119,28 +120,42 @@ class GooglePlayVerifier:
     def check_purchase_subscription(
         self, purchase_token: str, product_sku: str, service
     ) -> dict:
-        return (
-            service.purchases()
-            .subscriptions()
-            .get(
-                packageName=self.bundle_id,
-                subscriptionId=product_sku,
-                token=purchase_token,
+        try:
+            return (
+                service.purchases()
+                .subscriptions()
+                .get(
+                    packageName=self.bundle_id,
+                    subscriptionId=product_sku,
+                    token=purchase_token,
+                )
+                .execute(http=self.http)
             )
-            .execute(http=self.http)
-        )
+        except HttpError as e:
+            if e.resp.status == 400:
+                raise GoogleError(e.resp.reason, repr(e))
+            else:
+                raise e
 
     def check_purchase_product(
         self, purchase_token: str, product_sku: str, service
     ) -> dict:
-        return (
-            service.purchases()
-            .products()
-            .get(
-                packageName=self.bundle_id, productId=product_sku, token=purchase_token
+        try:
+            return (
+                service.purchases()
+                .products()
+                .get(
+                    packageName=self.bundle_id,
+                    productId=product_sku,
+                    token=purchase_token,
+                )
+                .execute(http=self.http)
             )
-            .execute(http=self.http)
-        )
+        except HttpError as e:
+            if e.resp.status == 400:
+                raise GoogleError(e.resp.reason, repr(e))
+            else:
+                raise e
 
     def verify(
         self, purchase_token: str, product_sku: str, is_subscription: bool = False
