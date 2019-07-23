@@ -106,7 +106,7 @@ class GooglePlayVerifier:
         if not ms_timestamp_value:
             return True
 
-        return datetime.datetime.fromtimestamp(ms_timestamp_value) < now
+        return datetime.datetime.utcfromtimestamp(ms_timestamp_value) < now
 
     def _authorize(self):
         http = httplib2.Http(timeout=self.http_timeout)
