@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="inapppy",
-    version="2.4.1",
+    version="2.4.2",
     packages=["inapppy", "inapppy.asyncio"],
     install_requires=[
         "aiohttp",
