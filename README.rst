@@ -26,7 +26,7 @@ Table of contents
 1. Introduction
 ===============
 
-In-app purchase validation library for `Apple AppStore` (`App Store` validator have *async* support!) and `GooglePlay`.
+In-app purchase validation library for `Apple AppStore` and `GooglePlay` (`App Store` validator have *async* support!).
 
 2. Installation
 ===============
