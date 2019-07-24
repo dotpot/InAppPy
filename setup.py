@@ -1,9 +1,11 @@
 # encoding: UTF-8
 from setuptools import setup
 
+
 def get_description():
     with open("README.rst") as info:
         return info.read()
+
 
 setup(
     name="inapppy",
