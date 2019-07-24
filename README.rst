@@ -9,21 +9,34 @@ InAppPy
 .. |downloads| image:: https://img.shields.io/pypi/dm/inapppy.svg
     :target: https://pypi.python.org/pypi/inapppy
 
-In-app purchase validation library for Apple AppStore and GooglePlay.
 
-Installation
-============
+Table of contents
+=================
+
+1. Introduction
+2. Installation
+3. Google Play (`receipt` + `signature`)
+4. Google Play (verification)
+5. App Store (`receipt` + using optional `shared-secret`)
+6. App Store Response (`validation_result` / `raw_response`) example
+7. App Store, *asyncio* version (available in the inapppy.asyncio package)
+8. Development
+
+
+1. Introduction
+===============
+
+In-app purchase validation library for `Apple AppStore` (`App Store` validator have *async* support!) and `GooglePlay`.
+
+2. Installation
+===============
 ::
 
     pip install inapppy
 
-Usage
-=====
 
-Currently inapppy supports Google Play and App Store receipts validation.
-
-Google Play (validates `receipt` against provided `signature` using RSA):
--------------------------------------------------------------------------
+3. Google Play (validates `receipt` against provided `signature` using RSA)
+===========================================================================
 .. code:: python
 
     from inapppy import GooglePlayValidator, InAppPyValidationError
@@ -41,8 +54,9 @@ Google Play (validates `receipt` against provided `signature` using RSA):
         # handle validation error
         pass
 
-Google Play verification:
--------------------------------------------------------------------------
+
+4. Google Play verification
+===========================
 .. code:: python
 
     from inapppy import GooglePlayVerifier, errors
@@ -74,8 +88,8 @@ Google Play verification:
         return response
 
 
-App Store (validates `receipt` using optional `shared-secret` against iTunes service):
---------------------------------------------------------------------------------------
+5. App Store (validates `receipt` using optional `shared-secret` against iTunes service)
+========================================================================================
 .. code:: python
 
     from inapppy import AppStoreValidator, InAppPyValidationError
@@ -96,8 +110,8 @@ App Store (validates `receipt` using optional `shared-secret` against iTunes ser
 
 
 
-App Store Response (`validation_result` / `raw_response`) Sample:
------------------------------------------------------------------
+6. App Store Response (`validation_result` / `raw_response`) example
+====================================================================
 .. code:: json
 
     {
@@ -176,8 +190,8 @@ App Store Response (`validation_result` / `raw_response`) Sample:
     }
 
 
-App Store, asyncio version (available in the inapppy.asyncio package)
----------------------------------------------------------------------
+7. App Store, asyncio version (available in the inapppy.asyncio package)
+========================================================================
 .. code:: python
 
     from inapppy import InAppPyValidationError
@@ -199,10 +213,13 @@ App Store, asyncio version (available in the inapppy.asyncio package)
 
 
 
-Development
-===========
+8. Development
+==============
 
 .. code:: bash
+
+    # run checks and tests
+    tox
 
     # setup project
     make setup
@@ -212,3 +229,6 @@ Development
 
     # run tests
     make test
+
+    # run black
+    make black
