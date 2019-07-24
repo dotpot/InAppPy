@@ -28,20 +28,13 @@ class AppStoreValidator(AppStoreValidator):
         self._change_url_by_sandbox()
         try:
             async with self._session.post(
-                self.url,
-                json=request_json,
-                timeout=ClientTimeout(total=self.http_timeout),
+                self.url, json=request_json, timeout=ClientTimeout(total=self.http_timeout)
             ) as resp:
                 return await resp.json(content_type=None)
         except (ValueError, ClientError):
             raise InAppPyValidationError("HTTP error")
 
-    async def validate(
-        self,
-        receipt: str,
-        shared_secret: str = None,
-        exclude_old_transactions: bool = False,
-    ) -> dict:
+    async def validate(self, receipt: str, shared_secret: str = None, exclude_old_transactions: bool = False) -> dict:
         """ Validates receipt against apple services.
 
         :param receipt: receipt
@@ -49,9 +42,7 @@ class AppStoreValidator(AppStoreValidator):
         :param exclude_old_transactions: optional to include only the latest renewal transaction
         :return: validation result or exception.
         """
-        receipt_json = self._prepare_receipt(
-            receipt, shared_secret, exclude_old_transactions
-        )
+        receipt_json = self._prepare_receipt(receipt, shared_secret, exclude_old_transactions)
 
         api_response = await self.post_json(receipt_json)
         status = api_response["status"]
@@ -65,9 +56,7 @@ class AppStoreValidator(AppStoreValidator):
             status = api_response["status"]
 
         if status != api_result_ok:
-            error = api_result_errors.get(
-                status, InAppPyValidationError("Unknown API status")
-            )
+            error = api_result_errors.get(status, InAppPyValidationError("Unknown API status"))
             error.raw_response = api_response
 
             raise error

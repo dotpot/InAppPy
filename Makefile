@@ -14,7 +14,7 @@ test:
 	tox
 
 black:
-	pipenv run black .
+	pipenv run black --config black.toml .
 
 lint:
 	pipenv run flake8

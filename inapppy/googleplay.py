@@ -12,20 +12,14 @@ from inapppy.errors import GoogleError, InAppPyValidationError
 
 
 def make_pem(public_key: str) -> str:
-    value = (
-        public_key[i : i + 64] for i in range(0, len(public_key), 64)  # noqa: E203
-    )
-    return "\n".join(
-        ("-----BEGIN PUBLIC KEY-----", "\n".join(value), "-----END PUBLIC KEY-----")
-    )
+    value = (public_key[i : i + 64] for i in range(0, len(public_key), 64))  # noqa: E203
+    return "\n".join(("-----BEGIN PUBLIC KEY-----", "\n".join(value), "-----END PUBLIC KEY-----"))
 
 
 class GooglePlayValidator:
     purchase_state_ok = 0
 
-    def __init__(
-        self, bundle_id: str, api_key: str, default_valid_purchase_state: int = 0
-    ) -> None:
+    def __init__(self, bundle_id: str, api_key: str, default_valid_purchase_state: int = 0) -> None:
         """
         Arguments:
             bundle_id: str - Also known as Android app's package name. E.g.:
@@ -79,9 +73,7 @@ class GooglePlayValidator:
 
 
 class GooglePlayVerifier:
-    def __init__(
-        self, bundle_id: str, private_key_path: str, http_timeout: int = 15
-    ) -> None:
+    def __init__(self, bundle_id: str, private_key_path: str, http_timeout: int = 15) -> None:
         """
         Arguments:
             bundle_id: str - Also known as Android app's package name.
@@ -117,18 +109,12 @@ class GooglePlayVerifier:
         http = credentials.authorize(http)
         return http
 
-    def check_purchase_subscription(
-        self, purchase_token: str, product_sku: str, service
-    ) -> dict:
+    def check_purchase_subscription(self, purchase_token: str, product_sku: str, service) -> dict:
         try:
             return (
                 service.purchases()
                 .subscriptions()
-                .get(
-                    packageName=self.bundle_id,
-                    subscriptionId=product_sku,
-                    token=purchase_token,
-                )
+                .get(packageName=self.bundle_id, subscriptionId=product_sku, token=purchase_token)
                 .execute(http=self.http)
             )
         except HttpError as e:
@@ -137,18 +123,12 @@ class GooglePlayVerifier:
             else:
                 raise e
 
-    def check_purchase_product(
-        self, purchase_token: str, product_sku: str, service
-    ) -> dict:
+    def check_purchase_product(self, purchase_token: str, product_sku: str, service) -> dict:
         try:
             return (
                 service.purchases()
                 .products()
-                .get(
-                    packageName=self.bundle_id,
-                    productId=product_sku,
-                    token=purchase_token,
-                )
+                .get(packageName=self.bundle_id, productId=product_sku, token=purchase_token)
                 .execute(http=self.http)
             )
         except HttpError as e:
@@ -157,15 +137,11 @@ class GooglePlayVerifier:
             else:
                 raise e
 
-    def verify(
-        self, purchase_token: str, product_sku: str, is_subscription: bool = False
-    ) -> dict:
+    def verify(self, purchase_token: str, product_sku: str, is_subscription: bool = False) -> dict:
         service = build("androidpublisher", "v3", http=self.http)
 
         if is_subscription:
-            result = self.check_purchase_subscription(
-                purchase_token, product_sku, service
-            )
+            result = self.check_purchase_subscription(purchase_token, product_sku, service)
             cancel_reason = int(result.get("cancelReason", 0))
 
             if cancel_reason != 0:

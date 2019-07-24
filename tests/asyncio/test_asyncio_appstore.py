@@ -28,10 +28,7 @@ async def test_appstore_validate_simple():
     assert validator is not None
 
     async def post_json(self, request_json):
-        assert request_json == {
-            "receipt-data": "test-receipt",
-            "password": "shared-secret",
-        }
+        assert request_json == {"receipt-data": "test-receipt", "password": "shared-secret"}
         return {"status": 0}
 
     async def post_json_no_secret(self, request_json):
@@ -83,9 +80,7 @@ async def test_appstore_validate_attach_raw_response_to_the_exception():
 
     with pytest.raises(InAppPyValidationError) as ex:
         with patch.object(AppStoreValidator, "post_json", new=post_json):
-            await validator.validate(
-                receipt="test-receipt", shared_secret="shared-secret"
-            )
+            await validator.validate(receipt="test-receipt", shared_secret="shared-secret")
             assert validator.url == "https://buy.itunes.apple.com/verifyReceipt"
             assert ex.raw_response is not None
             assert ex.raw_response == raw_response
@@ -93,9 +88,7 @@ async def test_appstore_validate_attach_raw_response_to_the_exception():
 
 @pytest.mark.asyncio
 async def test_appstore_auto_retry_wrong_env_request():
-    validator = AppStoreValidator(
-        bundle_id="test-bundle-id", sandbox=False, auto_retry_wrong_env_request=True
-    )
+    validator = AppStoreValidator(bundle_id="test-bundle-id", sandbox=False, auto_retry_wrong_env_request=True)
     assert validator is not None
     assert not validator.sandbox
     assert validator.auto_retry_wrong_env_request
@@ -108,9 +101,7 @@ async def test_appstore_auto_retry_wrong_env_request():
 
     with pytest.raises(InAppPyValidationError):
         with patch.object(AppStoreValidator, "post_json", new=post_json):
-            await validator.validate(
-                receipt="test-receipt", shared_secret="shared-secret"
-            )
+            await validator.validate(receipt="test-receipt", shared_secret="shared-secret")
             assert validator.url == "https://buy.itunes.apple.com/verifyReceipt"
             assert validator.sandbox is True
 
@@ -122,8 +113,6 @@ async def test_appstore_auto_retry_wrong_env_request():
 
     with pytest.raises(InAppPyValidationError):
         with patch.object(AppStoreValidator, "post_json", new=post_json):
-            await validator.validate(
-                receipt="test-receipt", shared_secret="shared-secret"
-            )
+            await validator.validate(receipt="test-receipt", shared_secret="shared-secret")
             assert validator.sandbox is False
             assert validator.url == "https://buy.itunes.apple.com/verifyReceipt"
