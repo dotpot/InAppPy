@@ -19,7 +19,7 @@ Table of contents
 4. Google Play (verification)
 5. App Store (`receipt` + using optional `shared-secret`)
 6. App Store Response (`validation_result` / `raw_response`) example
-7. App Store, *asyncio* version (available in the inapppy.asyncio package)
+7. App Store, **asyncio** version (available in the inapppy.asyncio package)
 8. Development
 
 
