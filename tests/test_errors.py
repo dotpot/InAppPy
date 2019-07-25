@@ -30,4 +30,4 @@ def test_google_error_message_stringify(generic_error_message):
 
 def test_google_error_message_and_raw_response_stringify(generic_error_message, generic_raw_response):
     error = GoogleError(generic_error_message, generic_raw_response)
-    assert str(error) == f"GoogleError(message={generic_error_message}, raw_response={generic_raw_response})2"
+    assert str(error) == f"GoogleError(message={generic_error_message}, raw_response={generic_raw_response})"
