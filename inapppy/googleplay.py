@@ -72,6 +72,27 @@ class GooglePlayValidator:
             return False
 
 
+class GoogleVerificationResult:
+    """Google verification result class."""
+
+    raw_response: dict = {}
+    is_expired: bool = False
+    is_canceled: bool = False
+
+    def __init__(self, raw_response: dict, is_expired: bool, is_canceled: bool):
+        self.raw_response = raw_response
+        self.is_expired = is_expired
+        self.is_canceled = is_canceled
+
+    def __repr__(self):
+        return (
+            f"GoogleVerificationResult("
+            f"raw_response={self.raw_response}, "
+            f"is_expired={self.is_expired}, "
+            f"is_canceled={self.is_canceled})"
+        )
+
+
 class GooglePlayVerifier:
     def __init__(self, bundle_id: str, private_key_path: str, http_timeout: int = 15) -> None:
         """
@@ -159,3 +180,32 @@ class GooglePlayVerifier:
                 raise GoogleError("Purchase cancelled", result)
 
         return result
+
+    def verify_with_result(
+        self, purchase_token: str, product_sku: str, is_subscription: bool = False
+    ) -> GoogleVerificationResult:
+        """Verifies by returning verification result instead of raising an error,
+        basically it's and better alternative to verify method."""
+        service = build("androidpublisher", "v3", http=self.http)
+        verification_result = GoogleVerificationResult({}, False, False)
+
+        if is_subscription:
+            result = self.check_purchase_subscription(purchase_token, product_sku, service)
+            verification_result.raw_response = result
+
+            cancel_reason = int(result.get("cancelReason", 0))
+            if cancel_reason != 0:
+                verification_result.is_canceled = True
+
+            ms_timestamp = result.get("expiryTimeMillis", 0)
+            if self._ms_timestamp_expired(ms_timestamp):
+                verification_result.is_expired = True
+        else:
+            result = self.check_purchase_product(purchase_token, product_sku, service)
+            verification_result.raw_response = result
+
+            purchase_state = int(result.get("purchaseState", 1))
+            if purchase_state != 0:
+                verification_result.is_canceled = True
+
+        return verification_result
