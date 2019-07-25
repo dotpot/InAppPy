@@ -11,12 +11,12 @@ class InAppPyValidationError(Exception):
         super().__init__(message, *args, **kwargs)
 
     def __str__(self):
-        return f"InAppPyValidationError(message={self.message}, raw_response={self.raw_response})"
+        return f"{self.__class__.__name__} {self.message} {self.raw_response}"
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(message={self.message!r}, raw_response={self.raw_response!r})"
 
 
 class GoogleError(InAppPyValidationError):
     def __init__(self, message: str = None, raw_response: dict = None, *args, **kwargs):
         super().__init__(message, raw_response, *args, **kwargs)
-
-    def __str__(self):
-        return f"GoogleError(message={self.message}, raw_response={self.raw_response})"

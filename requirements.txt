@@ -11,7 +11,6 @@ chardet==3.0.4
 Click==7.0
 colorama==0.4.1
 coverage==5.0a6
-docutils==0.15.1
 entrypoints==0.3
 google-api-python-client==1.7.10
 google-auth==1.6.3
