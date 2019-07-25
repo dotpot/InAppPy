@@ -18,5 +18,4 @@ class InAppPyValidationError(Exception):
 
 
 class GoogleError(InAppPyValidationError):
-    def __init__(self, message: str = None, raw_response: dict = None, *args, **kwargs):
-        super().__init__(message, raw_response, *args, **kwargs)
+    pass

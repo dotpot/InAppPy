@@ -32,6 +32,48 @@ def test_google_verify_subscription():
                 verifier.verify("test-token", "test-product", is_subscription=True)
 
 
+def test_google_verify_with_result_subscription():
+    with patch.object(googleplay, "build", return_value=None):
+        with patch.object(googleplay.GooglePlayVerifier, "_authorize", return_value=None):
+            verifier = googleplay.GooglePlayVerifier("test-bundle-id", "private_key_path", 30)
+
+            # expired
+            with patch.object(verifier, "check_purchase_subscription", return_value={"expiryTimeMillis": 666}):
+                result = verifier.verify_with_result("test-token", "test-product", is_subscription=True)
+                assert result.is_canceled is False
+                assert result.is_expired
+                assert result.raw_response == {"expiryTimeMillis": 666}
+                assert (
+                    str(result) == "GoogleVerificationResult(raw_response="
+                    "{'expiryTimeMillis': 666}, "
+                    "is_expired=True, "
+                    "is_canceled=False)"
+                )
+
+            # canceled
+            with patch.object(verifier, "check_purchase_subscription", return_value={"cancelReason": 666}):
+                result = verifier.verify_with_result("test-token", "test-product", is_subscription=True)
+                assert result.is_canceled
+                assert result.is_expired
+                assert result.raw_response == {"cancelReason": 666}
+                assert (
+                    str(result) == "GoogleVerificationResult("
+                    "raw_response={'cancelReason': 666}, "
+                    "is_expired=True, "
+                    "is_canceled=True)"
+                )
+
+            # norm
+            now = datetime.datetime.utcnow().timestamp()
+            exp_value = now * 1000 + 10 ** 10
+            with patch.object(verifier, "check_purchase_subscription", return_value={"expiryTimeMillis": exp_value}):
+                result = verifier.verify_with_result("test-token", "test-product", is_subscription=True)
+                assert result.is_canceled is False
+                assert result.is_expired is False
+                assert result.raw_response == {"expiryTimeMillis": exp_value}
+                assert str(result) is not None
+
+
 def test_google_verify_product():
     with patch.object(googleplay, "build", return_value=None):
         with patch.object(googleplay.GooglePlayVerifier, "_authorize", return_value=None):
@@ -45,6 +87,33 @@ def test_google_verify_product():
             with patch.object(verifier, "check_purchase_product", return_value={"purchaseState": 1}):
                 with pytest.raises(errors.GoogleError):
                     verifier.verify("test-token", "test-product")
+
+
+def test_google_verify_with_result_product():
+    with patch.object(googleplay, "build", return_value=None):
+        with patch.object(googleplay.GooglePlayVerifier, "_authorize", return_value=None):
+            verifier = googleplay.GooglePlayVerifier("test-bundle-id", "private_key_path", 30)
+
+            # purchase
+            with patch.object(verifier, "check_purchase_product", return_value={"purchaseState": 0}):
+                result = verifier.verify_with_result("test-token", "test-product")
+                assert result.is_canceled is False
+                assert result.is_expired is False
+                assert result.raw_response == {"purchaseState": 0}
+                assert str(result) is not None
+
+            # cancelled
+            with patch.object(verifier, "check_purchase_product", return_value={"purchaseState": 1}):
+                result = verifier.verify_with_result("test-token", "test-product")
+                assert result.is_canceled
+                assert result.is_expired is False
+                assert result.raw_response == {"purchaseState": 1}
+                assert (
+                    str(result) == "GoogleVerificationResult("
+                    "raw_response={'purchaseState': 1}, "
+                    "is_expired=False, "
+                    "is_canceled=True)"
+                )
 
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
