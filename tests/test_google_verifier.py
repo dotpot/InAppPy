@@ -6,7 +6,7 @@ import httplib2
 import pytest
 from googleapiclient.http import HttpMock, RequestMockBuilder
 
-from inapppy import googleplay, errors, GooglePlayVerifier
+from inapppy import GooglePlayVerifier, errors, googleplay
 
 
 def test_google_verify_subscription():

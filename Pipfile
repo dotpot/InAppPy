@@ -23,6 +23,12 @@ pytest-asyncio = "*"
 pytest-sugar = "*"
 pytest-cov = "*"
 black = "*"
+flake8-builtins = "*"
+flake8-commas = "*"
+flake8-eradicate = "*"
+flake8-quotes = "*"
+flake8-super-call = "*"
+isort = "*"
 
 [requires]
 python_version = "3.6"
