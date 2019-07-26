@@ -1,4 +1,4 @@
-from inapppy.errors import InAppPyValidationError, GoogleError
+from inapppy.errors import GoogleError, InAppPyValidationError
 
 
 def test_base_error_plain_stringify():

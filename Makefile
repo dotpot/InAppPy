@@ -16,6 +16,9 @@ test:
 black:
 	pipenv run black --config black.toml .
 
+isort:
+	pipenv run isort --recursive --atomic .
+
 lint:
 	pipenv run flake8
 
