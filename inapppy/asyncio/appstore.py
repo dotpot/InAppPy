@@ -1,4 +1,4 @@
-from aiohttp import ClientSession, ClientError, ClientTimeout
+from aiohttp import ClientError, ClientSession, ClientTimeout
 
 from ..appstore import AppStoreValidator, api_result_errors, api_result_ok
 from ..errors import InAppPyValidationError

@@ -1,7 +1,8 @@
-import pytest
 from unittest.mock import patch
 
-from inapppy import InAppPyValidationError, AppStoreValidator
+import pytest
+
+from inapppy import AppStoreValidator, InAppPyValidationError
 
 
 def test_appstore_validator_initiation_raises_if_no_bundle_id():

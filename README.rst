@@ -17,10 +17,11 @@ Table of contents
 2. Installation
 3. Google Play (`receipt` + `signature`)
 4. Google Play (verification)
-5. App Store (`receipt` + using optional `shared-secret`)
-6. App Store Response (`validation_result` / `raw_response`) example
-7. App Store, **asyncio** version (available in the inapppy.asyncio package)
-8. Development
+5. Google Play (verification with result)
+6. App Store (`receipt` + using optional `shared-secret`)
+7. App Store Response (`validation_result` / `raw_response`) example
+8. App Store, **asyncio** version (available in the inapppy.asyncio package)
+9. Development
 
 
 1. Introduction
@@ -88,7 +89,42 @@ In-app purchase validation library for `Apple AppStore` and `GooglePlay` (`App S
         return response
 
 
-5. App Store (validates `receipt` using optional `shared-secret` against iTunes service)
+5. Google Play verification (with result)
+=========================================
+Alternative to `.verify` method, instead of raising an error result class will be returned.
+
+.. code:: python
+
+    from inapppy import GooglePlayVerifier, errors
+
+
+    def google_validator(receipt):
+        """
+        Accepts receipt, validates in Google.
+        """
+        purchase_token = receipt['purchaseToken']
+        product_sku = receipt['productId']
+        verifier = GooglePlayVerifier(
+            GOOGLE_BUNDLE_ID,
+            GOOGLE_SERVICE_ACCOUNT_KEY_FILE,
+        )
+        response = {'valid': False, 'transactions': []}
+
+        result = verifier.verify_with_result(
+            purchase_token,
+            product_sku,
+            is_subscription=True
+        )
+
+        # result contains data
+        raw_response = result.raw_response
+        is_canceled = result.is_canceled
+        is_expired = result.is_expired
+
+        return result
+
+
+6. App Store (validates `receipt` using optional `shared-secret` against iTunes service)
 ========================================================================================
 .. code:: python
 
@@ -110,7 +146,7 @@ In-app purchase validation library for `Apple AppStore` and `GooglePlay` (`App S
 
 
 
-6. App Store Response (`validation_result` / `raw_response`) example
+7. App Store Response (`validation_result` / `raw_response`) example
 ====================================================================
 .. code:: json
 
@@ -190,7 +226,7 @@ In-app purchase validation library for `Apple AppStore` and `GooglePlay` (`App S
     }
 
 
-7. App Store, asyncio version (available in the inapppy.asyncio package)
+8. App Store, asyncio version (available in the inapppy.asyncio package)
 ========================================================================
 .. code:: python
 
@@ -213,7 +249,7 @@ In-app purchase validation library for `Apple AppStore` and `GooglePlay` (`App S
 
 
 
-8. Development
+9. Development
 ==============
 
 .. code:: bash
