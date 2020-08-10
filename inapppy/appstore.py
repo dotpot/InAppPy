@@ -18,6 +18,8 @@ api_result_errors = {
     # two following errors can use auto_retry_wrong_env_request.
     21007: InAppPyValidationError("Sandbox receipt was sent to the production env"),
     21008: InAppPyValidationError("Production receipt was sent to the sandbox env"),
+    21009: InAppPyValidationError("Internal data access error"),
+    21010: InAppPyValidationError("The user account cannot be found or has been deleted"),
 }
 
 
