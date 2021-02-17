@@ -1,4 +1,8 @@
-class InAppPyValidationError(Exception):
+class InAppPyError(Exception):
+    pass
+
+
+class InAppPyValidationError(InAppPyError):
     """ Base class for all validation errors """
 
     raw_response = None

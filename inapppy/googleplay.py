@@ -1,18 +1,22 @@
 import base64
 import datetime
 import json
+import os
 
 import httplib2
 import rsa
+
+from typing import Union
+
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from oauth2client.service_account import ServiceAccountCredentials
 
-from inapppy.errors import GoogleError, InAppPyValidationError
+from inapppy.errors import GoogleError, InAppPyValidationError, InAppPyError
 
 
 def make_pem(public_key: str) -> str:
-    value = (public_key[i : i + 64] for i in range(0, len(public_key), 64))  # noqa: E203
+    value = (public_key[i: i + 64] for i in range(0, len(public_key), 64))  # noqa: E203
     return "\n".join(("-----BEGIN PUBLIC KEY-----", "\n".join(value), "-----END PUBLIC KEY-----"))
 
 
@@ -94,7 +98,9 @@ class GoogleVerificationResult:
 
 
 class GooglePlayVerifier:
-    def __init__(self, bundle_id: str, private_key_path: str, http_timeout: int = 15) -> None:
+    DEFAULT_AUTH_SCOPE = "https://www.googleapis.com/auth/androidpublisher"
+    
+    def __init__(self, bundle_id: str, private_key: Union[str, dict], http_timeout: int = 15) -> None:
         """
         Arguments:
             bundle_id: str - Also known as Android app's package name.
@@ -102,7 +108,7 @@ class GooglePlayVerifier:
             http_timeout: int - HTTP connection timeout.
         """
         self.bundle_id = bundle_id
-        self.private_key_path = private_key_path
+        self.private_key = private_key
         self.http_timeout = http_timeout
         self.http = self._authorize()
 
@@ -122,11 +128,21 @@ class GooglePlayVerifier:
 
         return datetime.datetime.utcfromtimestamp(ms_timestamp_value) < now
 
+    @staticmethod
+    def _create_credentials(private_key: Union[str, dict], scope_str: str):
+        # If str, assume its a filepath
+        if isinstance(private_key, str):
+            if not os.path.exists(private_key):
+                raise InAppPyError(f"Google API private key file does not exist: {private_key}")
+            return ServiceAccountCredentials.from_json_keyfile_name(private_key, scope_str)
+        # If dict, assume parsed json
+        if isinstance(private_key, dict):
+            return ServiceAccountCredentials.from_json_keyfile_dict(private_key, scope_str)
+        raise InAppPyError(f"Unknown private key format: {repr(private_key)}, expected 'dict' or 'str' types")
+
     def _authorize(self):
         http = httplib2.Http(timeout=self.http_timeout)
-        credentials = ServiceAccountCredentials.from_json_keyfile_name(
-            self.private_key_path, "https://www.googleapis.com/auth/androidpublisher"
-        )
+        credentials = self._create_credentials(self.private_key, self.DEFAULT_AUTH_SCOPE)
         http = credentials.authorize(http)
         return http
 
@@ -134,9 +150,9 @@ class GooglePlayVerifier:
         try:
             return (
                 service.purchases()
-                .subscriptions()
-                .get(packageName=self.bundle_id, subscriptionId=product_sku, token=purchase_token)
-                .execute(http=self.http)
+                    .subscriptions()
+                    .get(packageName=self.bundle_id, subscriptionId=product_sku, token=purchase_token)
+                    .execute(http=self.http)
             )
         except HttpError as e:
             if e.resp.status == 400:
@@ -148,9 +164,9 @@ class GooglePlayVerifier:
         try:
             return (
                 service.purchases()
-                .products()
-                .get(packageName=self.bundle_id, productId=product_sku, token=purchase_token)
-                .execute(http=self.http)
+                    .products()
+                    .get(packageName=self.bundle_id, productId=product_sku, token=purchase_token)
+                    .execute(http=self.http)
             )
         except HttpError as e:
             if e.resp.status == 400:
@@ -182,7 +198,7 @@ class GooglePlayVerifier:
         return result
 
     def verify_with_result(
-        self, purchase_token: str, product_sku: str, is_subscription: bool = False
+            self, purchase_token: str, product_sku: str, is_subscription: bool = False
     ) -> GoogleVerificationResult:
         """Verifies by returning verification result instead of raising an error,
         basically it's and better alternative to verify method."""
