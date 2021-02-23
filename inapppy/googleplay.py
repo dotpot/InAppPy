@@ -100,15 +100,15 @@ class GoogleVerificationResult:
 class GooglePlayVerifier:
     DEFAULT_AUTH_SCOPE = "https://www.googleapis.com/auth/androidpublisher"
     
-    def __init__(self, bundle_id: str, private_key: Union[str, dict], http_timeout: int = 15) -> None:
+    def __init__(self, bundle_id: str, play_console_credentials: Union[str, dict], http_timeout: int = 15) -> None:
         """
         Arguments:
             bundle_id: str - Also known as Android app's package name.
-            private_key_path - Path to Google's Service Account private key.
+            play_console_credentials - Path or dict contents of Google's Service Credentials
             http_timeout: int - HTTP connection timeout.
         """
         self.bundle_id = bundle_id
-        self.private_key = private_key
+        self.play_console_credentials = play_console_credentials
         self.http_timeout = http_timeout
         self.http = self._authorize()
 
@@ -129,20 +129,21 @@ class GooglePlayVerifier:
         return datetime.datetime.utcfromtimestamp(ms_timestamp_value) < now
 
     @staticmethod
-    def _create_credentials(private_key: Union[str, dict], scope_str: str):
-        # If str, assume its a filepath
-        if isinstance(private_key, str):
-            if not os.path.exists(private_key):
-                raise InAppPyError(f"Google API private key file does not exist: {private_key}")
-            return ServiceAccountCredentials.from_json_keyfile_name(private_key, scope_str)
+    def _create_credentials(play_console_credentials: Union[str, dict], scope_str: str):
+        # If str, assume it's a filepath
+        if isinstance(play_console_credentials, str):
+            if not os.path.exists(play_console_credentials):
+                raise InAppPyError(f"Google play console credentials file does not exist: {play_console_credentials}")
+            return ServiceAccountCredentials.from_json_keyfile_name(play_console_credentials, scope_str)
         # If dict, assume parsed json
-        if isinstance(private_key, dict):
-            return ServiceAccountCredentials.from_json_keyfile_dict(private_key, scope_str)
-        raise InAppPyError(f"Unknown private key format: {repr(private_key)}, expected 'dict' or 'str' types")
+        if isinstance(play_console_credentials, dict):
+            return ServiceAccountCredentials.from_json_keyfile_dict(play_console_credentials, scope_str)
+        raise InAppPyError(f"Unknown play console credentials format: {repr(play_console_credentials)}, "
+                           "expected 'dict' or 'str' types")
 
     def _authorize(self):
         http = httplib2.Http(timeout=self.http_timeout)
-        credentials = self._create_credentials(self.private_key, self.DEFAULT_AUTH_SCOPE)
+        credentials = self._create_credentials(self.play_console_credentials, self.DEFAULT_AUTH_SCOPE)
         http = credentials.authorize(http)
         return http
 

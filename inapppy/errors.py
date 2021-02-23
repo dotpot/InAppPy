@@ -1,4 +1,5 @@
 class InAppPyError(Exception):
+    """ Base class for all errors """
     pass
 
 
