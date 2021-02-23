@@ -56,6 +56,39 @@ In-app purchase validation library for `Apple AppStore` and `GooglePlay` (`App S
         pass
 
 
+An additional example showing how to authenticate using dict credentials instead of loading from a file
+.. code:: python
+
+    import json
+    from inapppy import GooglePlayValidator, InAppPyValidationError
+
+
+    bundle_id = 'com.yourcompany.yourapp'
+    # Avoid hard-coding credential data in your code. This is just an example. 
+    api_credentials = json.loads('{'
+                                 '   "type": "service_account",'
+                                 '   "project_id": "xxxxxxx",'
+                                 '   "private_key_id": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",'
+                                 '   "private_key": "-----BEGIN PRIVATE KEY-----\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==\n-----END PRIVATE KEY-----\n",'
+                                 '   "client_email": "XXXXXXXXX@XXXXXXXX.XXX",'
+                                 '   "client_id": "XXXXXXXXXXXXXXXXXX",'
+                                 '   "auth_uri": "https://accounts.google.com/o/oauth2/auth",'
+                                 '   "token_uri": "https://oauth2.googleapis.com/token",'
+                                 '   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",'
+                                 '   "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/XXXXXXXXXXXXXXXXX.iam.gserviceaccount.com"'
+                                 ' }')
+    validator = GooglePlayValidator(bundle_id, api_credentials)
+
+    try:
+        # receipt means `androidData` in result of purchase
+        # signature means `signatureAndroid` in result of purchase
+        validation_result = validator.validate('receipt', 'signature')
+    except InAppPyValidationError:
+        # handle validation error
+        pass
+
+
+
 4. Google Play verification
 ===========================
 .. code:: python
