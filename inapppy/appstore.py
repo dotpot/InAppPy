@@ -1,3 +1,5 @@
+import warnings
+
 import requests
 from requests.exceptions import RequestException
 
@@ -22,19 +24,18 @@ api_result_errors = {
 class AppStoreValidator:
     def __init__(
         self,
-        bundle_id: str,
+        bundle_id: str = "",
         sandbox: bool = False,
         auto_retry_wrong_env_request: bool = False,
         http_timeout: int = None,
     ):
-        """ Constructor for AppStoreValidator
+        """Constructor for AppStoreValidator
 
-        :param bundle_id: apple bundle id
+        :param bundle_id: apple bundle id (no longer required).
         :param sandbox: sandbox mode ?
         :param auto_retry_wrong_env_request: auto retry on wrong env ?
         """
-        if not bundle_id:
-            raise InAppPyValidationError("bundle_id cannot be empty")
+        warnings.warn("bundle_id will be removed in version 3, since it's not used here.", PendingDeprecationWarning)
 
         self.bundle_id = bundle_id
         self.sandbox = sandbox
@@ -70,7 +71,7 @@ class AppStoreValidator:
             raise InAppPyValidationError("HTTP error")
 
     def validate(self, receipt: str, shared_secret: str = None, exclude_old_transactions: bool = False) -> dict:
-        """ Validates receipt against apple services.
+        """Validates receipt against apple services.
 
         :param receipt: receipt
         :param shared_secret: optional shared secret.

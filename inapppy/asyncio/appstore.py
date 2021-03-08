@@ -9,7 +9,7 @@ class AppStoreValidator(AppStoreValidator):
 
     def __init__(
         self,
-        bundle_id: str,
+        bundle_id: str = "",
         sandbox: bool = False,
         auto_retry_wrong_env_request: bool = False,
         http_timeout: int = None,
@@ -35,7 +35,7 @@ class AppStoreValidator(AppStoreValidator):
             raise InAppPyValidationError("HTTP error")
 
     async def validate(self, receipt: str, shared_secret: str = None, exclude_old_transactions: bool = False) -> dict:
-        """ Validates receipt against apple services.
+        """Validates receipt against apple services.
 
         :param receipt: receipt
         :param shared_secret: optional shared secret.
