@@ -27,7 +27,7 @@ Table of contents
 1. Introduction
 ===============
 
-In-app purchase validation library for `Apple AppStore` and `GooglePlay` (`App Store` validator have **async** support!).
+In-app purchase validation library for `Apple AppStore` and `GooglePlay` (`App Store` validator have **async** support!). Works on python3.6+
 
 2. Installation
 ===============
@@ -57,6 +57,7 @@ In-app purchase validation library for `Apple AppStore` and `GooglePlay` (`App S
 
 
 An additional example showing how to authenticate using dict credentials instead of loading from a file
+
 .. code:: python
 
     import json
