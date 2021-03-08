@@ -22,6 +22,7 @@ Table of contents
 7. App Store Response (`validation_result` / `raw_response`) example
 8. App Store, **asyncio** version (available in the inapppy.asyncio package)
 9. Development
+10. Donate
 
 
 1. Introduction
@@ -302,3 +303,19 @@ Alternative to `.verify` method, instead of raising an error result class will b
 
     # run black
     make black
+    
+10. Donate
+==========
+You can support development of this project by buying me a coffee ;)
+
++------+--------------------------------------------+
+| Coin | Wallet 			            |
++======+============================================+
+| EUR  | https://paypal.me/LukasSalkauskas          |
++------+--------------------------------------------+
+| DOGE | DGjSG3T6g9h2k6iSku7mtKCynCpmwowpyN         |
++------+--------------------------------------------+
+| BTC  | 1LZAiWmLYzZae4hq3ai9hFYD3e3qcwjDsU         |
++------+--------------------------------------------+
+| ETH  | 0xD62245986345130edE10e4b545fF577Bd5BaE3E4 |
++------+--------------------------------------------+
