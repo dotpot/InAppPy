@@ -72,7 +72,7 @@ class GooglePlayValidator:
         try:
             sig = base64.standard_b64decode(signature)
             return rsa.verify(receipt.encode(), sig, self.public_key)
-        except (rsa.VerificationError, TypeError, ValueError, BaseException):
+        except BaseException:
             return False
 
 
