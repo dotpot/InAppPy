@@ -2,21 +2,19 @@ import base64
 import datetime
 import json
 import os
+from typing import Union
 
 import httplib2
 import rsa
-
-from typing import Union
-
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from oauth2client.service_account import ServiceAccountCredentials
 
-from inapppy.errors import GoogleError, InAppPyValidationError, InAppPyError
+from inapppy.errors import GoogleError, InAppPyError, InAppPyValidationError
 
 
 def make_pem(public_key: str) -> str:
-    value = (public_key[i: i + 64] for i in range(0, len(public_key), 64))  # noqa: E203
+    value = (public_key[i : i + 64] for i in range(0, len(public_key), 64))  # noqa: E203
     return "\n".join(("-----BEGIN PUBLIC KEY-----", "\n".join(value), "-----END PUBLIC KEY-----"))
 
 
@@ -99,7 +97,7 @@ class GoogleVerificationResult:
 
 class GooglePlayVerifier:
     DEFAULT_AUTH_SCOPE = "https://www.googleapis.com/auth/androidpublisher"
-    
+
     def __init__(self, bundle_id: str, play_console_credentials: Union[str, dict], http_timeout: int = 15) -> None:
         """
         Arguments:
@@ -138,8 +136,10 @@ class GooglePlayVerifier:
         # If dict, assume parsed json
         if isinstance(play_console_credentials, dict):
             return ServiceAccountCredentials.from_json_keyfile_dict(play_console_credentials, scope_str)
-        raise InAppPyError(f"Unknown play console credentials format: {repr(play_console_credentials)}, "
-                           "expected 'dict' or 'str' types")
+        raise InAppPyError(
+            f"Unknown play console credentials format: {repr(play_console_credentials)}, "
+            "expected 'dict' or 'str' types"
+        )
 
     def _authorize(self):
         http = httplib2.Http(timeout=self.http_timeout)
@@ -149,12 +149,13 @@ class GooglePlayVerifier:
 
     def check_purchase_subscription(self, purchase_token: str, product_sku: str, service) -> dict:
         try:
-            return (
-                service.purchases()
-                    .subscriptions()
-                    .get(packageName=self.bundle_id, subscriptionId=product_sku, token=purchase_token)
-                    .execute(http=self.http)
+            purchases = service.purchases()
+            subscriptions = purchases.subscriptions()
+            subscriptions_get = subscriptions.get(
+                packageName=self.bundle_id, subscriptionId=product_sku, token=purchase_token
             )
+            result = subscriptions_get.execute(http=self.http)
+            return result
         except HttpError as e:
             if e.resp.status == 400:
                 raise GoogleError(e.resp.reason, repr(e))
@@ -163,12 +164,11 @@ class GooglePlayVerifier:
 
     def check_purchase_product(self, purchase_token: str, product_sku: str, service) -> dict:
         try:
-            return (
-                service.purchases()
-                    .products()
-                    .get(packageName=self.bundle_id, productId=product_sku, token=purchase_token)
-                    .execute(http=self.http)
-            )
+            purchases = service.purchases()
+            products = purchases.products()
+            products_get = products.get(packageName=self.bundle_id, productId=product_sku, token=purchase_token)
+            result = products_get.execute(http=self.http)
+            return result
         except HttpError as e:
             if e.resp.status == 400:
                 raise GoogleError(e.resp.reason, repr(e))
@@ -199,7 +199,7 @@ class GooglePlayVerifier:
         return result
 
     def verify_with_result(
-            self, purchase_token: str, product_sku: str, is_subscription: bool = False
+        self, purchase_token: str, product_sku: str, is_subscription: bool = False
     ) -> GoogleVerificationResult:
         """Verifies by returning verification result instead of raising an error,
         basically it's and better alternative to verify method."""
