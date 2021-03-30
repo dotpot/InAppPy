@@ -37,7 +37,9 @@ class AppStoreValidator:
         :param sandbox: sandbox mode ?
         :param auto_retry_wrong_env_request: auto retry on wrong env ?
         """
-        warnings.warn("bundle_id will be removed in version 3, since it's not used here.", PendingDeprecationWarning)
+        if bundle_id:
+            warnings.warn("bundle_id will be removed in version 3, since it's not used here.",
+                          PendingDeprecationWarning)
 
         self.bundle_id = bundle_id
         self.sandbox = sandbox
