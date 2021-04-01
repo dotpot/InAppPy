@@ -19,9 +19,7 @@ api_result_errors = {
     21007: InAppPyValidationError("Sandbox receipt was sent to the production env"),
     21008: InAppPyValidationError("Production receipt was sent to the sandbox env"),
     21009: InAppPyValidationError("Internal data access error"),
-    21010: InAppPyValidationError(
-        "The user account cannot be found or has been deleted"
-    ),
+    21010: InAppPyValidationError("The user account cannot be found or has been deleted"),
 }
 
 
@@ -59,9 +57,7 @@ class AppStoreValidator:
             else "https://buy.itunes.apple.com/verifyReceipt"
         )
 
-    def _prepare_receipt(
-        self, receipt: str, shared_secret: str, exclude_old_transactions: bool
-    ) -> dict:
+    def _prepare_receipt(self, receipt: str, shared_secret: str, exclude_old_transactions: bool) -> dict:
         receipt_json = {"receipt-data": receipt}
 
         if shared_secret:
@@ -76,9 +72,7 @@ class AppStoreValidator:
         self._change_url_by_sandbox()
 
         try:
-            return requests.post(
-                self.url, json=request_json, timeout=self.http_timeout
-            ).json()
+            return requests.post(self.url, json=request_json, timeout=self.http_timeout).json()
         except (ValueError, RequestException):
             raise InAppPyValidationError("HTTP error")
 
@@ -95,9 +89,7 @@ class AppStoreValidator:
         :param exclude_old_transactions: optional to include only the latest renewal transaction
         :return: validation result or exception.
         """
-        receipt_json = self._prepare_receipt(
-            receipt, shared_secret, exclude_old_transactions
-        )
+        receipt_json = self._prepare_receipt(receipt, shared_secret, exclude_old_transactions)
 
         api_response = self.post_json(receipt_json)
         status = api_response.get("status", "unknown")
@@ -111,9 +103,7 @@ class AppStoreValidator:
             status = api_response["status"]
 
         if status != api_result_ok:
-            error = api_result_errors.get(
-                status, InAppPyValidationError("Unknown API status")
-            )
+            error = api_result_errors.get(status, InAppPyValidationError("Unknown API status"))
             error.raw_response = api_response
 
             raise error
