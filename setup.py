@@ -9,7 +9,7 @@ def get_description():
 
 setup(
     name="inapppy",
-    version="2.5",
+    version="2.5.1",
     packages=["inapppy", "inapppy.asyncio"],
     install_requires=["aiohttp", "rsa", "requests", "google-api-python-client", "oauth2client"],
     description="In-app purchase validation library for Apple AppStore and GooglePlay.",
