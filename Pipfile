@@ -8,6 +8,7 @@ requests = "*"
 google-api-python-client = "*"
 "oauth2client" = "*"
 aiohttp = "*"
+urllib3 = "*"
 
 [dev-packages]
 pytest-sugar = "*"
