@@ -1,11 +1,11 @@
 class InAppPyError(Exception):
-    """ Base class for all errors """
+    """Base class for all errors"""
 
     pass
 
 
 class InAppPyValidationError(InAppPyError):
-    """ Base class for all validation errors """
+    """Base class for all validation errors"""
 
     raw_response = None
     message = None
