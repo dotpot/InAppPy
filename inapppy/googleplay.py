@@ -150,9 +150,7 @@ class GooglePlayVerifier:
         try:
             purchases = service.purchases()
             subscriptions = purchases.subscriptionsv2()
-            subscriptions_get = subscriptions.get(
-                packageName=self.bundle_id, token=purchase_token
-            )
+            subscriptions_get = subscriptions.get(packageName=self.bundle_id, token=purchase_token)
             result = subscriptions_get.execute(http=self.http)
             return result
         except HttpError as e:
