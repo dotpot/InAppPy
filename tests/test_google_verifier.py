@@ -131,7 +131,7 @@ def test_bad_request_subscription():
 
         request_mock_builder = RequestMockBuilder(
             {
-                "androidpublisher.purchases.subscriptions.get": (
+                "androidpublisher.purchases.subscriptionsv2.get": (
                     httplib2.Response({"status": 400, "reason": b"Bad request"}),
                     b'{"reason": "Bad request"}',
                 )

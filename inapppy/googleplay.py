@@ -149,9 +149,9 @@ class GooglePlayVerifier:
     def check_purchase_subscription(self, purchase_token: str, product_sku: str, service) -> dict:
         try:
             purchases = service.purchases()
-            subscriptions = purchases.subscriptions()
+            subscriptions = purchases.subscriptionsv2()
             subscriptions_get = subscriptions.get(
-                packageName=self.bundle_id, subscriptionId=product_sku, token=purchase_token
+                packageName=self.bundle_id, token=purchase_token
             )
             result = subscriptions_get.execute(http=self.http)
             return result
