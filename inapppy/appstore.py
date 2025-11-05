@@ -1,3 +1,4 @@
+import datetime
 import warnings
 
 import requests
@@ -21,6 +22,27 @@ api_result_errors = {
     21009: InAppPyValidationError("Internal data access error"),
     21010: InAppPyValidationError("The user account cannot be found or has been deleted"),
 }
+
+
+class AppStoreVerificationResult:
+    """App Store verification result class."""
+
+    raw_response: dict = {}
+    is_expired: bool = False
+    is_cancelled: bool = False
+
+    def __init__(self, raw_response: dict, is_expired: bool, is_cancelled: bool):
+        self.raw_response = raw_response
+        self.is_expired = is_expired
+        self.is_cancelled = is_cancelled
+
+    def __repr__(self):
+        return (
+            f"AppStoreVerificationResult("
+            f"raw_response={self.raw_response}, "
+            f"is_expired={self.is_expired}, "
+            f"is_cancelled={self.is_cancelled})"
+        )
 
 
 class AppStoreValidator:
@@ -76,6 +98,57 @@ class AppStoreValidator:
         except (ValueError, RequestException):
             raise InAppPyValidationError("HTTP error")
 
+    @staticmethod
+    def _ms_timestamp_expired(ms_timestamp: str) -> bool:
+        """Check if a millisecond timestamp has expired.
+
+        :param ms_timestamp: timestamp in milliseconds as string
+        :return: True if expired, False otherwise
+        """
+        now = datetime.datetime.utcnow()
+
+        # Return if it's 0/None, expired.
+        if not ms_timestamp:
+            return True
+
+        try:
+            ms_timestamp_value = int(ms_timestamp) / 1000
+        except (ValueError, TypeError):
+            return True
+
+        # Return if it's 0, expired.
+        if not ms_timestamp_value:
+            return True
+
+        return datetime.datetime.utcfromtimestamp(ms_timestamp_value) < now
+
+    @staticmethod
+    def _check_subscription_expired(receipt_info: dict) -> bool:
+        """Check if subscription is expired based on latest_receipt_info.
+
+        :param receipt_info: latest receipt info from Apple's response
+        :return: True if expired, False otherwise
+        """
+        if not receipt_info:
+            return True
+
+        # Get the expires_date_ms from the latest receipt
+        expires_date_ms = receipt_info.get("expires_date_ms", "0")
+        return AppStoreValidator._ms_timestamp_expired(expires_date_ms)
+
+    @staticmethod
+    def _check_subscription_cancelled(receipt_info: dict) -> bool:
+        """Check if subscription is cancelled based on cancellation_date.
+
+        :param receipt_info: latest receipt info from Apple's response
+        :return: True if cancelled, False otherwise
+        """
+        if not receipt_info:
+            return False
+
+        # If cancellation_date or cancellation_date_ms exists, subscription was cancelled/refunded
+        return "cancellation_date" in receipt_info or "cancellation_date_ms" in receipt_info
+
     def validate(
         self,
         receipt: str,
@@ -109,3 +182,37 @@ class AppStoreValidator:
             raise error
 
         return api_response
+
+    def verify_with_result(
+        self,
+        receipt: str,
+        shared_secret: str = None,
+        exclude_old_transactions: bool = False,
+    ) -> AppStoreVerificationResult:
+        """Validates receipt and returns verification result instead of raising an error.
+
+        This is an alternative to validate() method that returns a result object
+        with is_expired and is_cancelled properties instead of raising exceptions.
+
+        :param receipt: receipt
+        :param shared_secret: optional shared secret.
+        :param exclude_old_transactions: optional to include only the latest renewal transaction
+        :return: AppStoreVerificationResult with validation details
+        """
+        try:
+            api_response = self.validate(receipt, shared_secret, exclude_old_transactions)
+        except InAppPyValidationError as e:
+            # If validation fails, return result with raw_response from exception
+            api_response = getattr(e, "raw_response", {})
+
+        # Get latest receipt info (last element in array as it's the most recent)
+        latest_receipt_info_list = api_response.get("latest_receipt_info", [])
+        latest_receipt_info = latest_receipt_info_list[-1] if latest_receipt_info_list else {}
+
+        # Check if subscription is expired or cancelled
+        is_expired = self._check_subscription_expired(latest_receipt_info)
+        is_cancelled = self._check_subscription_cancelled(latest_receipt_info)
+
+        return AppStoreVerificationResult(
+            raw_response=api_response, is_expired=is_expired, is_cancelled=is_cancelled
+        )
