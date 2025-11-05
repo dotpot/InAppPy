@@ -29,6 +29,7 @@ dependencies = [
     "requests",
     "google-api-python-client",
     "oauth2client",
+    "pyOpenSSL<=24.2.1",
 ]
 
 [project.optional-dependencies]
