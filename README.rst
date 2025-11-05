@@ -321,7 +321,8 @@ This is a separate operation that should be called after verification to handle 
 
     try:
         exclude_old_transactions=False # if True, include only the latest renewal transaction
-        validation_result = await validator.validate('receipt', 'optional-shared-secret', exclude_old_transactions=exclude_old_transactions)
+        async with validator:  # Use async context manager to ensure proper session management
+            validation_result = await validator.validate('receipt', 'optional-shared-secret', exclude_old_transactions=exclude_old_transactions)
     except InAppPyValidationError as ex:
         # handle validation error
         response_from_apple = ex.raw_response  # contains actual response from AppStore service.

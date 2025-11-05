@@ -99,3 +99,23 @@ async def test_appstore_auto_retry_wrong_env_request(appstore_validator_auto_ret
             await validator.validate(receipt="test-receipt", shared_secret="shared-secret")
             assert validator.sandbox is False
             assert validator.url == "https://buy.itunes.apple.com/verifyReceipt"
+
+
+@pytest.mark.asyncio
+async def test_appstore_async_context_manager():
+    """Test that async context manager properly initializes and returns self."""
+    bundle_id = "com.test.app"
+    validator = AppStoreValidator(bundle_id)
+
+    # Verify session is None before entering context
+    assert validator._session is None
+
+    # Test async context manager
+    async with validator as v:
+        # Verify __aenter__ returns self
+        assert v is validator
+        # Verify session is initialized
+        assert validator._session is not None
+
+    # Verify session is closed after exiting context
+    assert validator._session is None

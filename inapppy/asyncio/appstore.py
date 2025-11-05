@@ -19,6 +19,7 @@ class AppStoreValidator(AppStoreValidator):
 
     async def __aenter__(self):
         self._session = ClientSession()
+        return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self._session.close()
