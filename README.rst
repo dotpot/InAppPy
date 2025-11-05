@@ -18,11 +18,12 @@ Table of contents
 3. Google Play (`receipt` + `signature`)
 4. Google Play (verification)
 5. Google Play (verification with result)
-6. App Store (`receipt` + using optional `shared-secret`)
-7. App Store Response (`validation_result` / `raw_response`) example
-8. App Store, **asyncio** version (available in the inapppy.asyncio package)
-9. Development
-10. Donate
+6. Google Play (consuming products)
+7. App Store (`receipt` + using optional `shared-secret`)
+8. App Store Response (`validation_result` / `raw_response`) example
+9. App Store, **asyncio** version (available in the inapppy.asyncio package)
+10. Development
+11. Donate
 
 
 1. Introduction
@@ -159,7 +160,51 @@ Alternative to `.verify` method, instead of raising an error result class will b
         return result
 
 
-6. App Store (validates `receipt` using optional `shared-secret` against iTunes service)
+6. Google Play (consuming products)
+===================================
+After validating a purchase, you can consume a one-time product to prevent refunds and allow the user to purchase it again.
+This is a separate operation that should be called after verification to handle cases like power outages between validation and consumption.
+
+.. code:: python
+
+    from inapppy import GooglePlayVerifier, errors
+
+
+    def consume_purchase(receipt):
+        """
+        Consume a purchase after validation.
+        """
+        purchase_token = receipt['purchaseToken']
+        product_sku = receipt['productId']
+        verifier = GooglePlayVerifier(
+            GOOGLE_BUNDLE_ID,
+            GOOGLE_SERVICE_ACCOUNT_KEY_FILE,
+        )
+
+        try:
+            # First verify the purchase
+            verification_result = verifier.verify(
+                purchase_token,
+                product_sku,
+                is_subscription=False
+            )
+
+            # Then consume it to prevent refunds
+            consume_result = verifier.consume_product(
+                purchase_token,
+                product_sku
+            )
+
+            return {'success': True, 'consumed': True}
+        except errors.GoogleError as exc:
+            logging.error('Purchase consumption failed {}'.format(exc))
+            return {'success': False, 'error': str(exc)}
+
+
+**Note:** Only consumable products (one-time purchases) can be consumed. Subscriptions cannot be consumed.
+
+
+7. App Store (validates `receipt` using optional `shared-secret` against iTunes service)
 ========================================================================================
 .. code:: python
 
@@ -181,7 +226,7 @@ Alternative to `.verify` method, instead of raising an error result class will b
 
 
 
-7. App Store Response (`validation_result` / `raw_response`) example
+8. App Store Response (`validation_result` / `raw_response`) example
 ====================================================================
 .. code:: json
 
@@ -261,7 +306,7 @@ Alternative to `.verify` method, instead of raising an error result class will b
     }
 
 
-8. App Store, asyncio version (available in the inapppy.asyncio package)
+9. App Store, asyncio version (available in the inapppy.asyncio package)
 ========================================================================
 .. code:: python
 
@@ -284,8 +329,8 @@ Alternative to `.verify` method, instead of raising an error result class will b
 
 
 
-9. Development
-==============
+10. Development
+===============
 
 .. code:: bash
 
@@ -304,7 +349,7 @@ Alternative to `.verify` method, instead of raising an error result class will b
     # run black
     make black
     
-10. Donate
+11. Donate
 ==========
 You can support development of this project by buying me a coffee ;)
 

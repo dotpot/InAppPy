@@ -163,3 +163,45 @@ def test_bad_request_product():
         with patch.object(googleplay, "build", return_value=build_mock_result):
             with pytest.raises(errors.GoogleError, match="Bad request"):
                 verifier.verify("broken_purchase_token", "product_scu")
+
+
+def test_consume_product():
+    with patch.object(googleplay.GooglePlayVerifier, "_authorize", return_value=None):
+        verifier = GooglePlayVerifier("test-bundle-id", "private_key_path", 30)
+
+        auth = HttpMock(datafile("androidpublisher.json"), headers={"status": 200})
+
+        request_mock_builder = RequestMockBuilder(
+            {
+                "androidpublisher.purchases.products.consume": (
+                    httplib2.Response({"status": 200}),
+                    b'{}',
+                )
+            }
+        )
+        build_mock_result = googleplay.build("androidpublisher", "v3", http=auth, requestBuilder=request_mock_builder)
+
+        with patch.object(googleplay, "build", return_value=build_mock_result):
+            result = verifier.consume_product("test-purchase-token", "test-product-sku")
+            assert result == {}
+
+
+def test_consume_product_bad_request():
+    with patch.object(googleplay.GooglePlayVerifier, "_authorize", return_value=None):
+        verifier = GooglePlayVerifier("bundle_id", "private_key_path")
+
+        auth = HttpMock(datafile("androidpublisher.json"), headers={"status": 200})
+
+        request_mock_builder = RequestMockBuilder(
+            {
+                "androidpublisher.purchases.products.consume": (
+                    httplib2.Response({"status": 400, "reason": b"Bad request"}),
+                    b'{"reason": "Bad request"}',
+                )
+            }
+        )
+        build_mock_result = googleplay.build("androidpublisher", "v3", http=auth, requestBuilder=request_mock_builder)
+
+        with patch.object(googleplay, "build", return_value=build_mock_result):
+            with pytest.raises(errors.GoogleError, match="Bad request"):
+                verifier.consume_product("broken_purchase_token", "product_scu")
