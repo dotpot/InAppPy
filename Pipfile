@@ -9,6 +9,7 @@ google-api-python-client = "*"
 "oauth2client" = "*"
 aiohttp = "*"
 urllib3 = "*"
+pyopenssl = "<=24.2.1"
 
 [dev-packages]
 pytest-sugar = "*"
