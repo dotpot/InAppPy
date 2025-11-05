@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -119,3 +119,67 @@ async def test_appstore_async_context_manager():
 
     # Verify session is closed after exiting context
     assert validator._session is None
+
+
+@pytest.mark.asyncio
+async def test_appstore_async_http_error_includes_raw_response(appstore_validator: AppStoreValidator):
+    """Test that async HTTP errors include raw_response with status code and content"""
+    from unittest.mock import AsyncMock, Mock
+
+    # Create a mock response
+    mock_resp = Mock()
+    mock_resp.status = 503
+    mock_resp.text = AsyncMock(return_value="Service Unavailable")
+
+    # Create a mock session post that returns our mock response
+    def mock_post(*args, **kwargs):
+        class MockContext:
+            async def __aenter__(self):
+                return mock_resp
+
+            async def __aexit__(self, *args):
+                pass
+
+        return MockContext()
+
+    with pytest.raises(InAppPyValidationError) as exc_info:
+        appstore_validator._session = Mock()
+        appstore_validator._session.post = mock_post
+        # Mock json.loads to raise ValueError (simulating invalid JSON)
+        with patch("json.loads", side_effect=ValueError("Invalid JSON")):
+            await appstore_validator.post_json({"receipt-data": "test"})
+
+    # Verify raw_response is not None and contains useful information
+    assert exc_info.value.raw_response is not None
+    assert "error" in exc_info.value.raw_response
+    assert "status_code" in exc_info.value.raw_response
+    assert exc_info.value.raw_response["status_code"] == 503
+    assert "content" in exc_info.value.raw_response
+    assert exc_info.value.raw_response["content"] == "Service Unavailable"
+
+
+@pytest.mark.asyncio
+async def test_appstore_async_network_error_includes_raw_response(appstore_validator: AppStoreValidator):
+    """Test that async network errors include raw_response with error details"""
+    from aiohttp import ClientError
+
+    # Create a mock session that raises ClientError
+    def mock_post(*args, **kwargs):
+        class MockContext:
+            async def __aenter__(self):
+                raise ClientError("Connection timeout")
+
+            async def __aexit__(self, *args):
+                pass
+
+        return MockContext()
+
+    with pytest.raises(InAppPyValidationError) as exc_info:
+        appstore_validator._session = Mock()
+        appstore_validator._session.post = mock_post
+        await appstore_validator.post_json({"receipt-data": "test"})
+
+    # Verify raw_response is not None and contains error information
+    assert exc_info.value.raw_response is not None
+    assert "error" in exc_info.value.raw_response
+    assert "Connection timeout" in exc_info.value.raw_response["error"]

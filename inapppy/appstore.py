@@ -93,10 +93,23 @@ class AppStoreValidator:
     def post_json(self, request_json: dict) -> dict:
         self._change_url_by_sandbox()
 
+        response = None
         try:
-            return requests.post(self.url, json=request_json, timeout=self.http_timeout).json()
-        except (ValueError, RequestException):
-            raise InAppPyValidationError("HTTP error")
+            response = requests.post(self.url, json=request_json, timeout=self.http_timeout)
+            return response.json()
+        except (ValueError, RequestException) as e:
+            # Build raw_response with available information
+            raw_response = {"error": str(e)}
+
+            # Try to include response details if available
+            if response is not None:
+                raw_response["status_code"] = response.status_code
+                try:
+                    raw_response["content"] = response.text
+                except Exception:
+                    pass
+
+            raise InAppPyValidationError("HTTP error", raw_response=raw_response)
 
     @staticmethod
     def _ms_timestamp_expired(ms_timestamp: str) -> bool:

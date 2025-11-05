@@ -27,13 +27,29 @@ class AppStoreValidator(AppStoreValidator):
 
     async def post_json(self, request_json: dict) -> dict:
         self._change_url_by_sandbox()
+        response_text = None
+        status_code = None
         try:
             async with self._session.post(
                 self.url, json=request_json, timeout=ClientTimeout(total=self.http_timeout)
             ) as resp:
-                return await resp.json(content_type=None)
-        except (ValueError, ClientError):
-            raise InAppPyValidationError("HTTP error")
+                status_code = resp.status
+                response_text = await resp.text()
+                # Try to parse as JSON
+                import json
+
+                return json.loads(response_text)
+        except (ValueError, ClientError) as e:
+            # Build raw_response with available information
+            raw_response = {"error": str(e)}
+
+            # Try to include response details if available
+            if status_code is not None:
+                raw_response["status_code"] = status_code
+            if response_text is not None:
+                raw_response["content"] = response_text
+
+            raise InAppPyValidationError("HTTP error", raw_response=raw_response)
 
     async def validate(self, receipt: str, shared_secret: str = None, exclude_old_transactions: bool = False) -> dict:
         """Validates receipt against apple services.

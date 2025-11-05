@@ -91,3 +91,40 @@ def test_appstore_auto_retry_wrong_env_request(appstore_validator_auto_retry_on_
             assert mock_method.call_count == 1
             assert validator.url == "https://buy.itunes.apple.com/verifyReceipt"
             assert mock_method.call_args[0][0] == {"receipt-data": "test-receipt", "password": "shared-secret"}
+
+
+def test_appstore_http_error_includes_raw_response(appstore_validator: AppStoreValidator):
+    """Test that HTTP errors include raw_response with status code and content"""
+    from unittest.mock import Mock
+
+    # Mock a response that has status code but invalid JSON
+    mock_response = Mock()
+    mock_response.status_code = 503
+    mock_response.text = "Service Unavailable"
+    mock_response.json.side_effect = ValueError("No JSON object could be decoded")
+
+    with pytest.raises(InAppPyValidationError) as exc_info:
+        with patch("requests.post", return_value=mock_response):
+            appstore_validator.post_json({"receipt-data": "test"})
+
+    # Verify raw_response is not None and contains useful information
+    assert exc_info.value.raw_response is not None
+    assert "error" in exc_info.value.raw_response
+    assert "status_code" in exc_info.value.raw_response
+    assert exc_info.value.raw_response["status_code"] == 503
+    assert "content" in exc_info.value.raw_response
+    assert exc_info.value.raw_response["content"] == "Service Unavailable"
+
+
+def test_appstore_network_error_includes_raw_response(appstore_validator: AppStoreValidator):
+    """Test that network errors include raw_response with error details"""
+    from requests.exceptions import RequestException
+
+    with pytest.raises(InAppPyValidationError) as exc_info:
+        with patch("requests.post", side_effect=RequestException("Connection timeout")):
+            appstore_validator.post_json({"receipt-data": "test"})
+
+    # Verify raw_response is not None and contains error information
+    assert exc_info.value.raw_response is not None
+    assert "error" in exc_info.value.raw_response
+    assert "Connection timeout" in exc_info.value.raw_response["error"]
