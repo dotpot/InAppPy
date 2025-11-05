@@ -1,9 +1,9 @@
 InAppPy
 =======
-|travis| |pypi| |downloads|
+|ci| |pypi| |downloads|
 
-.. |travis| image:: https://travis-ci.org/dotpot/InAppPy.svg?branch=master
-    :target: https://travis-ci.org/dotpot/InAppPy
+.. |ci| image:: https://github.com/dotpot/InAppPy/actions/workflows/ci.yml/badge.svg
+    :target: https://github.com/dotpot/InAppPy/actions/workflows/ci.yml
 .. |pypi| image:: https://badge.fury.io/py/inapppy.svg
     :target: https://badge.fury.io/py/inapppy
 .. |downloads| image:: https://img.shields.io/pypi/dm/inapppy.svg
@@ -332,22 +332,57 @@ This is a separate operation that should be called after verification to handle 
 10. Development
 ===============
 
+Prerequisites
+-------------
+
+Install `uv <https://docs.astral.sh/uv/>`_ for fast Python package management:
+
 .. code:: bash
 
-    # run checks and tests
-    tox
+    # macOS/Linux
+    curl -LsSf https://astral.sh/uv/install.sh | sh
 
-    # setup project
-    make setup
+    # Windows
+    powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-    # check for lint errors
+Setup and Testing
+-----------------
+
+.. code:: bash
+
+    # Install development dependencies
+    make dev
+
+    # Run linting checks
     make lint
 
-    # run tests
+    # Format code with ruff
+    make format
+
+    # Run both lint and format checks
+    make check
+
+    # Run tests
     make test
 
-    # run black
-    make black
+    # Run tests with pytest directly
+    uv run pytest -v
+
+Available Make Commands
+-----------------------
+
+.. code:: bash
+
+    make setup     # Install dependencies with uv
+    make dev       # Install development dependencies with uv
+    make clean     # Remove build artifacts
+    make build     # Build distribution packages
+    make release   # Upload to PyPI
+    make test      # Run tests with pytest
+    make lint      # Run ruff linting
+    make format    # Format code with ruff
+    make check     # Run lint and format check
+    make install   # Install package in editable mode
     
 11. Donate
 ==========

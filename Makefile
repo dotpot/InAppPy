@@ -1,27 +1,50 @@
+.PHONY: help setup clean build release test lint format check install dev
+
+help:
+	@echo "Available commands:"
+	@echo "  make setup     - Install dependencies with uv"
+	@echo "  make dev       - Install development dependencies with uv"
+	@echo "  make clean     - Remove build artifacts"
+	@echo "  make build     - Build distribution packages"
+	@echo "  make release   - Upload to PyPI"
+	@echo "  make test      - Run tests with pytest"
+	@echo "  make lint      - Run ruff linting"
+	@echo "  make format    - Format code with ruff"
+	@echo "  make check     - Run lint and format check"
+	@echo "  make install   - Install package in editable mode"
+
 setup:
-	pipenv install
+	uv pip install -e .
+
+dev:
+	uv pip install -e ".[dev]"
 
 clean:
-	rm -rf dist build
+	rm -rf dist build *.egg-info
+	find . -type d -name __pycache__ -exec rm -rf {} +
+	find . -type f -name "*.pyc" -delete
+	find . -type f -name "*.pyo" -delete
+	find . -type f -name "*.coverage" -delete
+	rm -rf .pytest_cache .ruff_cache .venv
 
-build:
-	 pipenv run python3 setup.py sdist bdist_wheel
+build: clean
+	uv build
 
-release:
-	twine upload dist/*
+release: build
+	uv publish
 
 test:
-	tox
-
-black:
-	pipenv run black --config black.toml .
-
-isort:
-	pipenv run isort --recursive --atomic .
+	.venv/bin/pytest -v
 
 lint:
-	pipenv run flake8
+	.venv/bin/ruff check .
 
-runall: black lint test clean build
+format:
+	.venv/bin/ruff format .
 
-rebuild: clean build
+check:
+	.venv/bin/ruff check .
+	.venv/bin/ruff format --check .
+
+install:
+	uv pip install -e .

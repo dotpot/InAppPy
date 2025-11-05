@@ -1,0 +1,119 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inapppy"
+version = "2.6"
+description = "In-app purchase validation library for Apple AppStore and GooglePlay."
+authors = [
+    {name = "Lukas Šalkauskas", email = "halfas.online@gmail.com"}
+]
+readme = "README.rst"
+license = {text = "MIT"}
+keywords = ["in-app", "store", "purchase", "googleplay", "appstore", "validation"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "aiohttp",
+    "rsa",
+    "requests",
+    "google-api-python-client",
+    "oauth2client",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pytest",
+    "pytest-sugar",
+    "pytest-cov",
+    "pytest-asyncio",
+]
+
+[project.urls]
+Homepage = "https://github.com/dotpot/InAppPy"
+
+[tool.setuptools]
+packages = ["inapppy", "inapppy.asyncio"]
+
+[tool.black]
+line-length = 120
+target-version = ["py38", "py39", "py310", "py311", "py312", "py313"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.idea
+  | \build
+  | \dist
+  | \.vscode
+  | \.pytest_cache
+  | \.venv
+  | \.ruff_cache
+  | .*\.egg-info
+)/
+'''
+
+[tool.ruff]
+line-length = 120
+target-version = "py38"
+exclude = [
+    ".git",
+    ".idea",
+    "build",
+    "dist",
+    ".pytest_cache",
+    ".ruff_cache",
+    "__pycache__",
+    ".venv",
+    ".vscode",
+    "*.egg-info",
+]
+
+[tool.ruff.lint]
+# Enable flake8 rules that were in the original config
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "A",   # flake8-builtins
+    "COM", # flake8-commas
+    "ERA", # flake8-eradicate
+    "Q",   # flake8-quotes
+    "UP",  # pyupgrade
+]
+
+# Ignore rules matching the original .flake8 config
+ignore = [
+    "D1",    # Missing docstrings
+    "COM812", # Missing trailing comma (conflicts with formatter)
+    "COM819", # Prohibited trailing comma
+    "B028",  # No explicit stacklevel argument in warnings.warn
+    "B904",  # raise ... from err/None in except clause
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 8
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "double"
+
+[tool.ruff.lint.isort]
+# Match .isort.cfg settings
+force-single-line = false
+force-wrap-aliases = false
+split-on-trailing-comma = true
+known-first-party = ["inapppy", "helpers", "tests"]

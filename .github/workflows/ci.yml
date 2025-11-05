@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint and Style Checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        enable-cache: true
+
+    - name: Set up Python
+      run: uv python install 3.12
+
+    - name: Create virtual environment
+      run: uv venv
+
+    - name: Install dependencies
+      run: uv pip install ruff
+
+    - name: Run ruff linting
+      run: uv run ruff check .
+
+    - name: Run ruff formatting check
+      run: uv run ruff format --check .
+
+  test:
+    name: Test Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+        include:
+          - python-version: "3.14"
+            experimental: true
+    continue-on-error: ${{ matrix.experimental || false }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
+
+    - name: Create virtual environment
+      run: uv venv
+
+    - name: Install dependencies
+      run: |
+        uv pip install -e .
+        uv pip install ruff pytest pytest-sugar pytest-cov pytest-asyncio
+
+    - name: Run linting
+      run: |
+        uv run ruff check .
+        uv run ruff format --check .
+
+    - name: Run tests
+      run: uv run pytest -v
+
+    - name: Upload coverage reports
+      if: matrix.python-version == '3.12'
+      uses: codecov/codecov-action@v4
+      with:
+        fail_ci_if_error: false

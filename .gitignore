@@ -39,7 +39,7 @@ pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 htmlcov/
-.tox/
+.pytest_cache/
 .coverage
 .coverage.*
 .cache
@@ -59,11 +59,10 @@ docs/_build/
 
 # PyBuilder
 target/
-.travis.yml
+
+# Virtual environments
 .venv/
-LICENSE
-Pipfile
-Pipfile.lock
-README.rst
-setup.py
-tox.ini
+venv/
+
+# Ruff cache
+.ruff_cache/

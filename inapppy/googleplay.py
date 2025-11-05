@@ -137,8 +137,7 @@ class GooglePlayVerifier:
         if isinstance(play_console_credentials, dict):
             return ServiceAccountCredentials.from_json_keyfile_dict(play_console_credentials, scope_str)
         raise InAppPyError(
-            f"Unknown play console credentials format: {repr(play_console_credentials)}, "
-            "expected 'dict' or 'str' types"
+            f"Unknown play console credentials format: {repr(play_console_credentials)}, expected 'dict' or 'str' types"
         )
 
     def _authorize(self):
@@ -198,12 +197,11 @@ class GooglePlayVerifier:
             service = build("androidpublisher", "v3", http=self.http)
             purchases = service.purchases()
             products = purchases.products()
-            consume_request = products.consume(
-                packageName=self.bundle_id,
-                productId=product_sku,
-                token=purchase_token
-            )
+            consume_request = products.consume(packageName=self.bundle_id, productId=product_sku, token=purchase_token)
             result = consume_request.execute(http=self.http)
+            # Handle both parsed dict (real API) and bytes (mocked responses)
+            if isinstance(result, bytes):
+                result = json.loads(result.decode("utf-8"))
             return result
         except HttpError as e:
             if e.resp.status == 400:

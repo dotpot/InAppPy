@@ -213,6 +213,4 @@ class AppStoreValidator:
         is_expired = self._check_subscription_expired(latest_receipt_info)
         is_cancelled = self._check_subscription_cancelled(latest_receipt_info)
 
-        return AppStoreVerificationResult(
-            raw_response=api_response, is_expired=is_expired, is_cancelled=is_cancelled
-        )
+        return AppStoreVerificationResult(raw_response=api_response, is_expired=is_expired, is_cancelled=is_cancelled)
