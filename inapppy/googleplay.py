@@ -175,6 +175,42 @@ class GooglePlayVerifier:
             else:
                 raise e
 
+    def consume_product(self, purchase_token: str, product_sku: str) -> dict:
+        """
+        Consume a one-time product purchase.
+
+        This method marks a product as consumed in Google Play, preventing refunds
+        and allowing the user to purchase the product again. This should be called
+        as a separate operation after validating the purchase, to handle cases like
+        power outages between validation and consumption.
+
+        Arguments:
+            purchase_token: str - The purchase token from the purchase receipt
+            product_sku: str - The product ID (SKU) of the purchased item
+
+        Returns:
+            dict - Response from Google Play API
+
+        Raises:
+            GoogleError: If the API request fails
+        """
+        try:
+            service = build("androidpublisher", "v3", http=self.http)
+            purchases = service.purchases()
+            products = purchases.products()
+            consume_request = products.consume(
+                packageName=self.bundle_id,
+                productId=product_sku,
+                token=purchase_token
+            )
+            result = consume_request.execute(http=self.http)
+            return result
+        except HttpError as e:
+            if e.resp.status == 400:
+                raise GoogleError(e.resp.reason, repr(e))
+            else:
+                raise e
+
     def verify(self, purchase_token: str, product_sku: str, is_subscription: bool = False) -> dict:
         service = build("androidpublisher", "v3", http=self.http)
 
