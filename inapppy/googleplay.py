@@ -127,6 +127,32 @@ class GooglePlayVerifier:
         return datetime.datetime.utcfromtimestamp(ms_timestamp_value) < now
 
     @staticmethod
+    def _parse_iso8601_timestamp(iso_timestamp: str) -> datetime.datetime:
+        """Parse ISO 8601 timestamp (e.g., '2024-01-15T10:00:00Z' or '2024-01-15T10:00:00.123456Z')."""
+        # Remove 'Z' suffix and split timezone offset
+        cleaned = iso_timestamp.replace("Z", "+00:00")
+        timestamp_part = cleaned.split("+")[0]
+
+        # Parse with or without microseconds
+        if "." in timestamp_part:
+            dt = datetime.datetime.strptime(timestamp_part, "%Y-%m-%dT%H:%M:%S.%f")
+        else:
+            dt = datetime.datetime.strptime(timestamp_part, "%Y-%m-%dT%H:%M:%S")
+
+        return dt.replace(tzinfo=datetime.timezone.utc)
+
+    @staticmethod
+    def _iso_timestamp_expired(iso_timestamp: str) -> bool:
+        """Check if an ISO 8601 timestamp is expired."""
+        try:
+            expiry_dt = GooglePlayVerifier._parse_iso8601_timestamp(iso_timestamp)
+            now = datetime.datetime.now(datetime.timezone.utc)
+            return expiry_dt < now
+        except (ValueError, AttributeError):
+            # If parsing fails, don't treat as expired
+            return False
+
+    @staticmethod
     def _create_credentials(play_console_credentials: Union[str, dict], scope_str: str):
         # If str, assume it's a filepath
         if isinstance(play_console_credentials, str):
@@ -212,15 +238,34 @@ class GooglePlayVerifier:
 
         if is_subscription:
             result = self.check_purchase_subscription(purchase_token, product_sku, service)
-            cancel_reason = int(result.get("cancelReason", 0))
 
-            if cancel_reason != 0:
+            # Check cancellation status
+            # For old API (v1): check if cancelReason field exists (any value means canceled)
+            # For new API (v2): check if canceledStateContext exists or subscriptionState is CANCELED
+            if "cancelReason" in result:
+                # Old API: presence of cancelReason field means subscription is canceled
+                raise GoogleError("Subscription is canceled", result)
+            elif result.get("subscriptionState") == "SUBSCRIPTION_STATE_CANCELED":
+                # New API (v2): check subscription state
+                raise GoogleError("Subscription is canceled", result)
+            elif result.get("canceledStateContext") is not None:
+                # New API (v2): check canceled state context
                 raise GoogleError("Subscription is canceled", result)
 
+            # Check expiry status
+            # For old API (v1): expiryTimeMillis in root
+            # For new API (v2): lineItems[0].expiryTime in ISO format
             ms_timestamp = result.get("expiryTimeMillis", 0)
-
-            if self._ms_timestamp_expired(ms_timestamp):
-                raise GoogleError("Subscription expired", result)
+            if ms_timestamp:
+                # Old API format with milliseconds timestamp
+                if self._ms_timestamp_expired(ms_timestamp):
+                    raise GoogleError("Subscription expired", result)
+            else:
+                # New API format: check lineItems for ISO 8601 timestamp
+                line_items = result.get("lineItems", [])
+                if line_items and "expiryTime" in line_items[0]:
+                    if self._iso_timestamp_expired(line_items[0]["expiryTime"]):
+                        raise GoogleError("Subscription expired", result)
         else:
             result = self.check_purchase_product(purchase_token, product_sku, service)
             purchase_state = int(result.get("purchaseState", 1))
@@ -242,13 +287,39 @@ class GooglePlayVerifier:
             result = self.check_purchase_subscription(purchase_token, product_sku, service)
             verification_result.raw_response = result
 
-            cancel_reason = int(result.get("cancelReason", 0))
-            if cancel_reason != 0:
+            # Check cancellation status
+            # For old API (v1): check if cancelReason field exists (any value means canceled)
+            # For new API (v2): check if canceledStateContext exists or subscriptionState is CANCELED
+            if "cancelReason" in result:
+                # Old API: presence of cancelReason field means subscription is canceled
+                # (values: 0=user, 1=system, 2=replaced, 3=developer)
+                verification_result.is_canceled = True
+            elif result.get("subscriptionState") == "SUBSCRIPTION_STATE_CANCELED":
+                # New API (v2): check subscription state
+                verification_result.is_canceled = True
+            elif result.get("canceledStateContext") is not None:
+                # New API (v2): check canceled state context
                 verification_result.is_canceled = True
 
-            ms_timestamp = result.get("expiryTimeMillis", 0)
-            if self._ms_timestamp_expired(ms_timestamp):
-                verification_result.is_expired = True
+            # Check expiry status
+            # For old API (v1): expiryTimeMillis in root (0 or missing means expired)
+            # For new API (v2): lineItems[0].expiryTime in ISO format
+            ms_timestamp = result.get("expiryTimeMillis")
+            if ms_timestamp is not None:
+                # Old API format: use existing _ms_timestamp_expired logic
+                # (treats 0 or missing as expired for backward compatibility)
+                if self._ms_timestamp_expired(ms_timestamp):
+                    verification_result.is_expired = True
+            else:
+                # New API format: check lineItems for ISO 8601 timestamp
+                line_items = result.get("lineItems", [])
+                if line_items and "expiryTime" in line_items[0]:
+                    if self._iso_timestamp_expired(line_items[0]["expiryTime"]):
+                        verification_result.is_expired = True
+                elif not line_items:
+                    # No lineItems either - for backward compatibility with old API,
+                    # treat missing expiry info as expired
+                    verification_result.is_expired = True
         else:
             result = self.check_purchase_product(purchase_token, product_sku, service)
             verification_result.raw_response = result

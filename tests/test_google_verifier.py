@@ -19,8 +19,13 @@ def test_google_verify_subscription():
                 with pytest.raises(errors.GoogleError):
                     verifier.verify("test-token", "test-product", is_subscription=True)
 
-            # canceled
+            # canceled - non-zero cancelReason
             with patch.object(verifier, "check_purchase_subscription", return_value={"cancelReason": 666}):
+                with pytest.raises(errors.GoogleError):
+                    verifier.verify("test-token", "test-product", is_subscription=True)
+
+            # canceled - user canceled (cancelReason = 0)
+            with patch.object(verifier, "check_purchase_subscription", return_value={"cancelReason": 0}):
                 with pytest.raises(errors.GoogleError):
                     verifier.verify("test-token", "test-product", is_subscription=True)
 
@@ -50,7 +55,7 @@ def test_google_verify_with_result_subscription():
                     "is_canceled=False)"
                 )
 
-            # canceled
+            # canceled - non-zero cancelReason
             with patch.object(verifier, "check_purchase_subscription", return_value={"cancelReason": 666}):
                 result = verifier.verify_with_result("test-token", "test-product", is_subscription=True)
                 assert result.is_canceled
@@ -59,6 +64,21 @@ def test_google_verify_with_result_subscription():
                 assert (
                     str(result) == "GoogleVerificationResult("
                     "raw_response={'cancelReason': 666}, "
+                    "is_expired=True, "
+                    "is_canceled=True)"
+                )
+
+            # canceled - user canceled (cancelReason = 0)
+            # This is the fix for issue #66: cancelReason=0 means user canceled, not "not canceled"
+            with patch.object(verifier, "check_purchase_subscription", return_value={"cancelReason": 0}):
+                result = verifier.verify_with_result("test-token", "test-product", is_subscription=True)
+                assert result.is_canceled
+                # Note: is_expired=True because expiryTimeMillis is missing (backward compatibility)
+                assert result.is_expired
+                assert result.raw_response == {"cancelReason": 0}
+                assert (
+                    str(result) == "GoogleVerificationResult("
+                    "raw_response={'cancelReason': 0}, "
                     "is_expired=True, "
                     "is_canceled=True)"
                 )
