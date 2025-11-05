@@ -27,7 +27,7 @@ def test_google_verify_subscription():
             # norm
             now = datetime.datetime.utcnow().timestamp()
             with patch.object(
-                verifier, "check_purchase_subscription", return_value={"expiryTimeMillis": now * 1000 + 10 ** 10}
+                verifier, "check_purchase_subscription", return_value={"expiryTimeMillis": now * 1000 + 10**10}
             ):
                 verifier.verify("test-token", "test-product", is_subscription=True)
 
@@ -65,7 +65,7 @@ def test_google_verify_with_result_subscription():
 
             # norm
             now = datetime.datetime.utcnow().timestamp()
-            exp_value = now * 1000 + 10 ** 10
+            exp_value = now * 1000 + 10**10
             with patch.object(verifier, "check_purchase_subscription", return_value={"expiryTimeMillis": exp_value}):
                 result = verifier.verify_with_result("test-token", "test-product", is_subscription=True)
                 assert result.is_canceled is False
@@ -174,8 +174,8 @@ def test_consume_product():
         request_mock_builder = RequestMockBuilder(
             {
                 "androidpublisher.purchases.products.consume": (
-                    httplib2.Response({"status": 200}),
-                    b'{}',
+                    httplib2.Response({"status": 200, "content-type": "application/json"}),
+                    b"{}",
                 )
             }
         )
